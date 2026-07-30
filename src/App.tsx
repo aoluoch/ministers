@@ -1,5 +1,14 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { PageShell } from '@/components/layout/PageShell'
+import {
+  fetchAboutPage,
+  fetchContactPage,
+  fetchEventBySlug,
+  fetchFaqPage,
+  fetchGetInvolvedPage,
+  fetchHomePage,
+  fetchProgramsPage,
+} from '@/lib/contentful'
 import { HomePage } from '@/pages/HomePage'
 import { AboutPage } from '@/pages/AboutPage'
 import { ProgramsPage } from '@/pages/ProgramsPage'
@@ -12,13 +21,41 @@ const router = createBrowserRouter([
   {
     element: <PageShell />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: 'about', element: <AboutPage /> },
-      { path: 'programs', element: <ProgramsPage /> },
-      { path: 'programs/:slug', element: <EventDetailPage /> },
-      { path: 'get-involved', element: <GetInvolvedPage /> },
-      { path: 'contact', element: <ContactPage /> },
-      { path: 'faq', element: <FaqPage /> },
+      {
+        index: true,
+        element: <HomePage />,
+        loader: () => fetchHomePage(),
+      },
+      {
+        path: 'about',
+        element: <AboutPage />,
+        loader: () => fetchAboutPage(),
+      },
+      {
+        path: 'programs',
+        element: <ProgramsPage />,
+        loader: () => fetchProgramsPage(),
+      },
+      {
+        path: 'programs/:slug',
+        element: <EventDetailPage />,
+        loader: ({ params }) => fetchEventBySlug(params.slug ?? ''),
+      },
+      {
+        path: 'get-involved',
+        element: <GetInvolvedPage />,
+        loader: () => fetchGetInvolvedPage(),
+      },
+      {
+        path: 'contact',
+        element: <ContactPage />,
+        loader: () => fetchContactPage(),
+      },
+      {
+        path: 'faq',
+        element: <FaqPage />,
+        loader: () => fetchFaqPage(),
+      },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

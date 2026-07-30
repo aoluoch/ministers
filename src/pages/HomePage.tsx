@@ -1,13 +1,14 @@
-import { homeContent } from '@/content/home'
+import { useLoaderData } from 'react-router-dom'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { TextBlock } from '@/components/sections/TextBlock'
 import { ExploreLinks } from '@/components/sections/ExploreLinks'
 import { TrackRecord } from '@/components/sections/TrackRecord'
 import { Testimonials } from '@/components/sections/Testimonials'
 import { CtaBanner } from '@/components/sections/CtaBanner'
+import type { HomePageContent } from '@/types/content'
 
 export function HomePage() {
-  const c = homeContent
+  const c = useLoaderData() as HomePageContent
 
   return (
     <>

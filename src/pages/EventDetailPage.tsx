@@ -1,14 +1,13 @@
-import { Link, Navigate, useParams } from 'react-router-dom'
-import { getEventBySlug } from '@/content/programs'
+import { Link, Navigate, useLoaderData } from 'react-router-dom'
 import { EventDetailHero } from '@/components/sections/EventDetailHero'
 import { EventDetailBody } from '@/components/sections/EventDetailBody'
 import { EventGallery } from '@/components/sections/EventGallery'
 import { CtaBanner } from '@/components/sections/CtaBanner'
 import { siteContent } from '@/content/site'
+import type { EventItem } from '@/types/content'
 
 export function EventDetailPage() {
-  const { slug } = useParams<{ slug: string }>()
-  const event = slug ? getEventBySlug(slug) : undefined
+  const event = useLoaderData() as EventItem | undefined
 
   if (!event) {
     return <Navigate to="/programs" replace />

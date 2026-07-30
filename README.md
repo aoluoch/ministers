@@ -20,6 +20,16 @@ Optional — set a Google Form URL in `.env` for signup on the Summit event deta
 VITE_REGISTER_FORM_URL=https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform
 ```
 
+Optional — Contentful Content Delivery API (falls back to `src/content/*` when unset):
+
+```env
+VITE_CONTENTFUL_SPACE_ID=your_space_id
+VITE_CONTENTFUL_ACCESS_TOKEN=your_cda_token
+VITE_CONTENTFUL_ENVIRONMENT=master
+```
+
+See [`CONTENTFUL.md`](CONTENTFUL.md) for the content model. Fetch + adapters live in [`src/lib/contentful/`](src/lib/contentful/).
+
 ## Scripts
 
 | Command | Description |
@@ -74,26 +84,18 @@ public/
   ymlogo.jpg      Brand logo
 ```
 
-## Content architecture (Contentful-ready)
+## Content architecture (Contentful)
 
-Content is typed modules under `src/content/`. Section components are presentational only — each receives a **self-contained props object**. There are **no cross-entry references** to resolve later in Contentful.
+Pages load content via React Router loaders → `src/lib/contentful` fetchers. When Contentful env vars are missing (or a request fails), fetchers fall back to typed modules under `src/content/`.
 
-| Today | Later (Contentful) |
-|-------|--------------------|
-| `src/content/home.ts`, `about.ts`, … | One content type per page |
-| `src/content/programs.ts` `events` array | Each event is one self-contained entry (summary + detail + photos inline) |
-| `src/content/site.ts` | Single `siteSettings` entry for nav, socials, register URLs |
-| `/ymlogo.jpg` and event photos in `public/` | Native Contentful Asset fields on the same entry |
+| Source | Content |
+|--------|---------|
+| `homePage`, `aboutPage`, … singletons | Page copy |
+| `event` entries (queried by type / slug) | Programs list + detail |
+| `src/content/site.ts` | Nav, footer, socials (not in Contentful yet) |
+| Asset fields on the same entry | Cover images + event gallery photos |
 
-Pages compose sections explicitly:
-
-```tsx
-<HeroSection {...homeContent.hero} />
-```
-
-Events work the same way — list and detail pages read the same `EventItem` object by `slug` (`getEventBySlug`). Add photos by placing files in `public/` and filling the event’s `photos` array in [`src/content/programs.ts`](src/content/programs.ts).
-
-To migrate to Contentful: fetch data into the shapes in [`src/types/content.ts`](src/types/content.ts) and swap the content imports. No reference-resolution layer is required.
+Section components stay presentational — adapters map Contentful fields → [`src/types/content.ts`](src/types/content.ts). No entry-reference resolution.
 
 ## Brand
 

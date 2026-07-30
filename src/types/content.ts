@@ -209,3 +209,41 @@ export type SiteContent = {
   socials: { label: string; href: string; handle: string }[]
   footerTagline: string
 }
+
+/** Full page payloads (local content + Contentful adapters share these shapes). */
+
+export type HomePageContent = {
+  hero: HeroSectionProps
+  about: TextBlockProps
+  explore: ExploreLinksProps
+  trackRecord: TrackRecordProps
+  testimonials: TestimonialsProps
+  readyCta: CtaBannerProps
+}
+
+export type AboutPageContent = {
+  whyWeExist: TextBlockProps
+  mission: MissionBlockProps
+  beliefs: BeliefsListProps
+  difference: DifferenceBlockProps
+  leadership: LeadershipListProps
+  joinCta: CtaBannerProps
+}
+
+export type ProgramsPageContent = {
+  list: EventListProps
+}
+
+export type GetInvolvedPageContent = {
+  pathways: InvolvePathwaysProps
+  readyCta: CtaBannerProps
+}
+
+export type ContactPageContent = {
+  details: ContactDetailsProps
+}
+
+export type FaqPageContent = {
+  faq: FaqAccordionProps
+  cta: CtaBannerProps
+}
