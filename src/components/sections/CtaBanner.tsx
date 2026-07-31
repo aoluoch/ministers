@@ -10,6 +10,11 @@ export function CtaBanner({
   secondaryCta,
   tone = 'purple',
 }: CtaBannerProps) {
+  const hasPrimaryCta = Boolean(primaryCta.label && primaryCta.href)
+  const hasActions = hasPrimaryCta || Boolean(secondaryCta)
+
+  if (!title && !body && !hasActions) return null
+
   const purple = tone === 'purple'
 
   return (
@@ -20,14 +25,16 @@ export function CtaBanner({
       )}
     >
       <Reveal className="mx-auto max-w-3xl text-center">
-        <h2
-          className={cn(
-            'text-3xl font-bold sm:text-4xl',
-            purple ? 'text-summit-gradient' : 'text-brand-purple',
-          )}
-        >
-          {title}
-        </h2>
+        {title ? (
+          <h2
+            className={cn(
+              'text-3xl font-bold sm:text-4xl',
+              purple ? 'text-summit-gradient' : 'text-brand-purple',
+            )}
+          >
+            {title}
+          </h2>
+        ) : null}
         {body ? (
           <p
             className={cn(
@@ -38,12 +45,16 @@ export function CtaBanner({
             {body}
           </p>
         ) : null}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <CtaButton cta={primaryCta} variant={purple ? 'gradient' : 'default'} />
-          {secondaryCta ? (
-            <CtaButton cta={secondaryCta} variant={purple ? 'cream' : 'outline'} />
-          ) : null}
-        </div>
+        {hasActions ? (
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            {hasPrimaryCta ? (
+              <CtaButton cta={primaryCta} variant={purple ? 'gradient' : 'default'} />
+            ) : null}
+            {secondaryCta ? (
+              <CtaButton cta={secondaryCta} variant={purple ? 'cream' : 'outline'} />
+            ) : null}
+          </div>
+        ) : null}
       </Reveal>
     </section>
   )

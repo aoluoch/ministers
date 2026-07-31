@@ -6,6 +6,8 @@ export function EventGallery({
   photos,
   emptyNote,
 }: EventGalleryProps) {
+  if (!photos.length && !emptyNote) return null
+
   return (
     <section className="px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
       <div className="mx-auto max-w-6xl">
@@ -27,7 +29,7 @@ export function EventGallery({
                   <img
                     src={photo.src}
                     alt={photo.alt}
-                    className="aspect-[4/3] w-full object-cover"
+                    className="aspect-[4/3] w-full bg-brand-purple-deep/5 object-contain"
                     loading="lazy"
                   />
                   {photo.caption ? (

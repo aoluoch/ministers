@@ -26,6 +26,7 @@ export function EventDetailPage() {
         registerCta={event.registerCta}
       />
       <EventDetailBody
+        title={event.detailTitle}
         summary={event.summary}
         body={event.body}
         highlights={event.highlights}

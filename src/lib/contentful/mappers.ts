@@ -1,15 +1,23 @@
 import type { Asset, Entry } from 'contentful'
+import { siteContent } from '@/content/site'
 import type {
   AboutPageContent,
+  BeliefsListProps,
   ContactPageContent,
   EventItem,
   ExploreItem,
   FaqPageContent,
   GetInvolvedPageContent,
+  CtaBannerProps,
+  DifferenceBlockProps,
   ExploreLinksProps,
   HeroSectionProps,
   HomePageContent,
+  LeaderItem,
+  LeadershipListProps,
+  MissionBlockProps,
   ProgramsPageContent,
+  TestimonialsProps,
   TextBlockProps,
   TrackRecordProps,
 } from '@/types/content'
@@ -18,6 +26,8 @@ import {
   asJsonArray,
   asOptionalString,
   asParagraphs,
+  asRichTextBeliefs,
+  asRichTextParagraphs,
   asString,
   asTone,
   assetAlt,
@@ -26,17 +36,25 @@ import {
   fieldsOf,
 } from './helpers'
 import type {
+  AboutBeliefSkeleton,
+  AboutDifferenceBlockSkeleton,
+  AboutLeadershipSkeleton,
+  AboutMissionSkeleton,
   AboutPageSkeleton,
-  ContactPageSkeleton,
+  AboutTextblockSkeleton,
+  ContactSkeleton,
   EventSkeleton,
-  FaqPageSkeleton,
-  GetInvolvedPageSkeleton,
+  FaqSkeleton,
+  GetInvolvedSkeleton,
   HeroSectionSkeleton,
+  HomeCtaBannerSkeleton,
   HomeExploreLinksSkeleton,
   HomePageSkeleton,
+  HomeTestimonialsSkeleton,
   HomeTextBlockSkeleton,
   HomeTrackRecordSkeleton,
   ProgramsPageSkeleton,
+  ProgramsSkeleton,
 } from './types'
 
 export function mapHeroSection(
@@ -72,13 +90,7 @@ export function mapHomeExploreLinks(
   const f = fieldsOf(entry)
   return {
     title: asString(f.exploreTitle),
-    items: asJsonArray<ExploreItem>(f.exploreItems).filter(
-      (item) =>
-        typeof item?.title === 'string' &&
-        typeof item?.description === 'string' &&
-        typeof item?.href === 'string' &&
-        typeof item?.linkLabel === 'string',
-    ),
+    items: asExploreItems(f.exploreItems),
   }
 }
 
@@ -90,6 +102,33 @@ export function mapHomeTrackRecord(
     title: asString(f.trackRecordTitle),
     paragraphs: asParagraphs(f.trackRecordParagraph),
     quote: asString(f.trackRecordQuote),
+  }
+}
+
+export function mapHomeTestimonials(
+  entry: Entry<HomeTestimonialsSkeleton, undefined, string>,
+): TestimonialsProps {
+  const f = fieldsOf(entry)
+  return {
+    title: asString(f.title),
+    quotes: asTextList(f.quotes).map((quote) => ({ quote })),
+    story: asString(f.story),
+  }
+}
+
+export function mapHomeCtaBanner(
+  entry: Entry<HomeCtaBannerSkeleton, undefined, string>,
+): CtaBannerProps {
+  const f = fieldsOf(entry)
+
+  return {
+    title: asString(f.title),
+    body: asOptionalString(f.description),
+    primaryCta: {
+      label: 'View Our Programs',
+      href: '/programs',
+    },
+    tone: 'purple',
   }
 }
 
@@ -126,6 +165,171 @@ export function mapHomePageRest(
       primaryCta: primaryCta ?? { label: 'Register', href: '/programs' },
       tone: asTone(f.readyCtaTone),
     },
+  }
+}
+
+export function mapAboutTextblock(
+  entry: Entry<AboutTextblockSkeleton, undefined, string>,
+): TextBlockProps {
+  const f = fieldsOf(entry)
+  return {
+    title: asString(f.title),
+    paragraphs: asRichTextParagraphs(f.description),
+  }
+}
+
+export function mapAboutMission(
+  entry: Entry<AboutMissionSkeleton, undefined, string>,
+): MissionBlockProps {
+  const f = fieldsOf(entry)
+  return {
+    title: asString(f.title),
+    body: asString(f.description),
+  }
+}
+
+export function mapAboutBelief(
+  entry: Entry<AboutBeliefSkeleton, undefined, string>,
+): BeliefsListProps {
+  const f = fieldsOf(entry)
+  return {
+    title: asString(f.title),
+    intro: asString(f.beliefsIntro),
+    beliefs: asRichTextBeliefs(f.beliefsList),
+  }
+}
+
+function asTextList(value: unknown): string[] {
+  const fromJson = asJsonArray<string | { text?: string; quote?: string }>(value)
+    .map((item) => {
+      if (typeof item === 'string') return item.trim()
+      return asString(item?.text || item?.quote).trim()
+    })
+    .filter(Boolean)
+
+  if (fromJson.length) return fromJson
+  if (typeof value !== 'string') return []
+
+  return value
+    .split(/\n+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+type RawExploreItem = Partial<Record<keyof ExploreItem, unknown>> & {
+  url?: unknown
+  link?: unknown
+  label?: unknown
+}
+
+function asExploreItem(value: RawExploreItem): ExploreItem | null {
+  const title = asString(value.title).trim()
+  const description = asString(value.description).trim()
+  const href = asString(value.href || value.url || value.link).trim()
+  const linkLabel = asString(value.linkLabel || value.label).trim() || 'Learn more'
+
+  if (!title || !description || !href) return null
+  return { title, description, href, linkLabel }
+}
+
+function asExploreItems(value: unknown): ExploreItem[] {
+  const fromJson = asJsonArray<RawExploreItem>(value)
+    .map(asExploreItem)
+    .filter((item): item is ExploreItem => Boolean(item))
+
+  if (fromJson.length) return fromJson
+  if (typeof value !== 'string') return []
+
+  return value
+    .trim()
+    .split(/\n\s*\n+/)
+    .map(asExploreTextBlock)
+    .filter((item): item is ExploreItem => Boolean(item))
+}
+
+function asExploreTextBlock(block: string): ExploreItem | null {
+  const lines = block
+    .split(/\n+/)
+    .map((line) => line.replace(/^[-*]\s+/, '').trim())
+    .filter(Boolean)
+
+  if (!lines.length) return null
+
+  const parts = lines.length === 1
+    ? lines[0].split(/\s*\|\s*/).map((part) => part.trim()).filter(Boolean)
+    : lines
+
+  const labeled = parts.reduce<RawExploreItem>((item, line) => {
+    const match = line.match(/^(title|description|href|url|link|linkLabel|link label|label):\s*(.+)$/i)
+    if (!match) return item
+
+    const key = match[1].toLowerCase().replace(/\s+/g, '')
+    const value = match[2].trim()
+    if (key === 'title') item.title = value
+    if (key === 'description') item.description = value
+    if (key === 'href' || key === 'url' || key === 'link') item.href = value
+    if (key === 'linklabel' || key === 'label') item.linkLabel = value
+    return item
+  }, {})
+
+  const labeledItem = asExploreItem(labeled)
+  if (labeledItem) return labeledItem
+
+  return asExploreItem({
+    title: parts[0],
+    description: parts[1],
+    href: parts[2],
+    linkLabel: parts[3],
+  })
+}
+
+function asLeader(value: unknown): LeaderItem | null {
+  if (!value || typeof value !== 'object') return null
+  const item = value as Record<string, unknown>
+  const role = asString(item.role).trim()
+  const name = asString(item.name).trim()
+  if (!role || !name) return null
+
+  return {
+    role,
+    name,
+    affiliation: asOptionalString(item.affiliation),
+    bio: asOptionalString(item.bio),
+  }
+}
+
+function asLeaders(value: unknown): LeaderItem[] {
+  const source = (() => {
+    if (Array.isArray(value)) return value
+    if (!value || typeof value !== 'object') return []
+
+    const objectValue = value as Record<string, unknown>
+    if (Array.isArray(objectValue.leaders)) return objectValue.leaders
+    if (Array.isArray(objectValue.items)) return objectValue.items
+    return Object.values(objectValue)
+  })()
+
+  return source.map(asLeader).filter((leader): leader is LeaderItem => Boolean(leader))
+}
+
+export function mapAboutDifferenceBlock(
+  entry: Entry<AboutDifferenceBlockSkeleton, undefined, string>,
+): DifferenceBlockProps {
+  const f = fieldsOf(entry)
+  return {
+    title: asString(f.title),
+    paragraphs: asRichTextParagraphs(f.description),
+    quotes: asTextList(f.quotes),
+  }
+}
+
+export function mapAboutLeadership(
+  entry: Entry<AboutLeadershipSkeleton, undefined, string>,
+): LeadershipListProps {
+  const f = fieldsOf(entry)
+  return {
+    title: asString(f.leadershipTitle),
+    leaders: asLeaders(f.title),
   }
 }
 
@@ -187,8 +391,30 @@ export function mapProgramsPageChrome(
 }
 
 function asEventStatus(value: unknown): EventItem['status'] {
-  if (value === 'upcoming' || value === 'ongoing' || value === 'past') return value
+  const status = typeof value === 'string' ? value.trim().toLowerCase() : ''
+  if (status === 'upcoming' || status === 'ongoing' || status === 'past') return status
   return 'upcoming'
+}
+
+function asSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function asDateLabel(value: unknown): string {
+  if (typeof value !== 'string' || !value.trim()) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+
+  return new Intl.DateTimeFormat('en', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
 }
 
 export function mapEvent(
@@ -202,6 +428,7 @@ export function mapEvent(
   return {
     slug: asString(f.slug),
     title,
+    detailTitle: undefined,
     cadence: asString(f.cadence),
     status: asEventStatus(f.status),
     summary: asString(f.summary),
@@ -234,62 +461,111 @@ export function mapEvent(
   }
 }
 
-export function mapGetInvolvedPage(
-  entry: Entry<GetInvolvedPageSkeleton, undefined, string>,
-): GetInvolvedPageContent {
+export function mapProgram(
+  entry: Entry<ProgramsSkeleton, undefined, string>,
+): EventItem {
   const f = fieldsOf(entry)
-  const primary = asCta(f.ctaPrimaryLabel, f.ctaPrimaryHref)
+  const title = asString(f.title)
+  const photos = (Array.isArray(f.media) ? f.media : []) as Asset[]
+  const cover = photos[0]
 
   return {
+    slug: asSlug(title || entry.sys.id),
+    title,
+    detailTitle: asOptionalString(f.eventDetailTitle),
+    cadence: asString(f.tag),
+    status: asEventStatus(f.status),
+    summary: asString(f.summary),
+    dateLabel: asDateLabel(f.date),
+    location: asString(f.location),
+    coverImage: (() => {
+      const src = assetUrl(cover)
+      if (!src) return undefined
+      return { src, alt: assetAlt(cover, title) }
+    })(),
+    body: asRichTextParagraphs(f.description),
+    highlights: (() => {
+      const list = asRichTextParagraphs(f.eventDetails)
+      return list.length ? list : undefined
+    })(),
+    photos: photos
+      .map((asset) => {
+        const src = assetUrl(asset)
+        if (!src) return null
+        return {
+          src,
+          alt: assetAlt(asset, title),
+          caption: assetCaption(asset),
+        }
+      })
+      .filter((p): p is NonNullable<typeof p> => p !== null),
+  }
+}
+
+export function mapGetInvolvedPage(
+  entries: Entry<GetInvolvedSkeleton, undefined, string>[],
+): GetInvolvedPageContent {
+  return {
     pathways: {
-      title: asString(f.title),
-      intro: asString(f.intro),
-      pathways: asJsonArray(f.pathways),
+      title: '',
+      intro: '',
+      pathways: entries
+        .map((entry) => {
+          const f = fieldsOf(entry)
+          return {
+            title: asString(f.title).trim(),
+            description: asString(f.description).trim(),
+          }
+        })
+        .filter((item) => item.title || item.description),
     },
     readyCta: {
-      title: asString(f.ctaTitle),
-      primaryCta: primary ?? { label: 'Register', href: '/programs' },
-      secondaryCta: asCta(f.ctaSecondaryLabel, f.ctaSecondaryHref),
-      tone: asTone(f.ctaTone),
+      title: '',
+      primaryCta: { label: '', href: '' },
+      tone: 'purple',
     },
   }
 }
 
 export function mapContactPage(
-  entry: Entry<ContactPageSkeleton, undefined, string>,
+  entry: Entry<ContactSkeleton, undefined, string>,
 ): ContactPageContent {
   const f = fieldsOf(entry)
   return {
     details: {
       title: asString(f.title),
-      intro: asString(f.intro),
-      phoneLabel: asString(f.phoneLabel),
-      phone: asString(f.phone),
-      locationLabel: asString(f.locationLabel),
-      location: asString(f.location),
-      followLabel: asString(f.followLabel),
-      socials: asJsonArray(f.socials),
-      pressNote: asString(f.pressNote),
+      intro: asRichTextParagraphs(f.description),
+      phoneLabel: '',
+      phone: '',
+      locationLabel: '',
+      location: '',
+      followLabel: 'Follow us',
+      socials: siteContent.socials,
+      pressNote: '',
     },
   }
 }
 
 export function mapFaqPage(
-  entry: Entry<FaqPageSkeleton, undefined, string>,
+  entries: Entry<FaqSkeleton, undefined, string>[],
 ): FaqPageContent {
-  const f = fieldsOf(entry)
-  const primary = asCta(f.ctaPrimaryLabel, f.ctaPrimaryHref)
-
   return {
     faq: {
-      title: asOptionalString(f.title),
-      items: asJsonArray(f.items),
+      title: '',
+      items: entries
+        .map((entry) => {
+          const f = fieldsOf(entry)
+          return {
+            question: asString(f.title).trim(),
+            answer: asString(f.description).trim(),
+          }
+        })
+        .filter((item) => item.question || item.answer),
     },
     cta: {
-      title: asString(f.ctaTitle),
-      primaryCta: primary ?? { label: 'Register', href: '/programs' },
-      secondaryCta: asCta(f.ctaSecondaryLabel, f.ctaSecondaryHref),
-      tone: asTone(f.ctaTone),
+      title: '',
+      primaryCta: { label: '', href: '' },
+      tone: 'purple',
     },
   }
 }

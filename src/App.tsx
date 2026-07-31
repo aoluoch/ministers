@@ -17,9 +17,14 @@ import { GetInvolvedPage } from '@/pages/GetInvolvedPage'
 import { ContactPage } from '@/pages/ContactPage'
 import { FaqPage } from '@/pages/FaqPage'
 
+function RouteHydrateFallback() {
+  return <div className="min-h-screen bg-background" />
+}
+
 const router = createBrowserRouter([
   {
     element: <PageShell />,
+    hydrateFallbackElement: <RouteHydrateFallback />,
     children: [
       {
         index: true,

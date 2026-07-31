@@ -14,13 +14,7 @@ npm run dev
 
 Open the local URL Vite prints (usually `http://localhost:5173`).
 
-Optional — set a Google Form URL in `.env` for signup on the Summit event detail page:
-
-```env
-VITE_REGISTER_FORM_URL=https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform
-```
-
-Optional — Contentful Content Delivery API (falls back to `src/content/*` when unset):
+Add Contentful Content Delivery API credentials to `.env` for page content:
 
 ```env
 VITE_CONTENTFUL_SPACE_ID=your_space_id
@@ -28,7 +22,7 @@ VITE_CONTENTFUL_ACCESS_TOKEN=your_cda_token
 VITE_CONTENTFUL_ENVIRONMENT=master
 ```
 
-See [`CONTENTFUL.md`](CONTENTFUL.md) for the content model. Fetch + adapters live in [`src/lib/contentful/`](src/lib/contentful/).
+Fetchers and field adapters live in [`src/lib/contentful/`](src/lib/contentful/). If the Contentful env vars are missing, the app returns empty page sections instead of using local copy.
 
 ## Scripts
 
@@ -59,9 +53,9 @@ See [`CONTENTFUL.md`](CONTENTFUL.md) for the content model. Fetch + adapters liv
 ## Registration flow
 
 1. Site-wide **Register for the Summit** buttons go to **`/programs`** so visitors can read about events first.
-2. On the Summit event detail page, the register CTA uses `VITE_REGISTER_FORM_URL` (Google Form). If unset, that link falls back to `#`.
+2. Event detail CTAs come from Contentful program fields (`registerCtaLabel` and `registerCtaHref`).
 
-Configure the marketing destination in [`src/content/site.ts`](src/content/site.ts) (`registerCtaHref`). Configure the form URL via env / `getRegisterFormUrl()`.
+Configure the site-wide marketing destination in [`src/content/site.ts`](src/content/site.ts) (`registerCtaHref`).
 
 ## Social links
 
@@ -76,23 +70,25 @@ src/
     sections/     Page sections (hero, events, FAQ, CTAs, …)
     ui/           shadcn primitives (Button, Accordion, Sheet, …)
     SocialLinks.tsx
-  content/        Typed page + site content (CMS-ready)
+  content/        Site chrome config (nav, logo, footer, socials)
   pages/          Route-level page composition
   types/          Content prop interfaces
-  lib/            Utilities + register URL helper
+  lib/            Utilities + Contentful fetchers/mappers
 public/
   ymlogo.jpg      Brand logo
 ```
 
 ## Content architecture (Contentful)
 
-Pages load content via React Router loaders → `src/lib/contentful` fetchers. When Contentful env vars are missing (or a request fails), fetchers fall back to typed modules under `src/content/`.
+Pages load content via React Router loaders → `src/lib/contentful` fetchers. Page copy is CMS-owned; there are no local page-content modules. When Contentful is unavailable, loaders return empty typed section objects so components can safely render nothing.
 
 | Source | Content |
 |--------|---------|
-| `homePage`, `aboutPage`, … singletons | Page copy |
-| `event` entries (queried by type / slug) | Programs list + detail |
-| `src/content/site.ts` | Nav, footer, socials (not in Contentful yet) |
+| Home section singletons (`heroSection`, `homeTextBlock`, etc.) | Home page sections |
+| About section singletons (`aboutTextblock`, `aboutMission`, etc.) | About page sections |
+| `programs` entries | Programs list + detail |
+| `getInvolved`, `contact`, `faq` entries | Get Involved, Contact, FAQ pages |
+| `src/content/site.ts` | Nav, logo, footer, socials |
 | Asset fields on the same entry | Cover images + event gallery photos |
 
 Section components stay presentational — adapters map Contentful fields → [`src/types/content.ts`](src/types/content.ts). No entry-reference resolution.
@@ -113,6 +109,4 @@ Fonts: **Plus Jakarta Sans** (display) and **Source Sans 3** (body).
 ## Placeholders to replace later
 
 - Phone number in `src/content/site.ts`
-- Founder bio on the About / leadership content
-- Event photos (`photos` arrays are empty with “coming soon” notes)
-- `VITE_REGISTER_FORM_URL` when your Google Form is ready
+- Any remaining site chrome that should move into Contentful later

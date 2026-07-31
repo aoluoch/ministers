@@ -9,6 +9,10 @@ export function HeroSection({
   supportingLine,
   primaryCta,
 }: HeroSectionProps) {
+  const hasPrimaryCta = Boolean(primaryCta.label && primaryCta.href)
+
+  if (!brandName && !headline && !body && !supportingLine && !hasPrimaryCta) return null
+
   return (
     <section className="relative overflow-hidden bg-brand-purple text-brand-cream">
       <div
@@ -53,9 +57,11 @@ export function HeroSection({
           {supportingLine}
         </p>
 
-        <div className="animate-fade-up mt-10" style={{ animationDelay: '380ms' }}>
-          <CtaButton cta={primaryCta} variant="gradient" />
-        </div>
+        {hasPrimaryCta ? (
+          <div className="animate-fade-up mt-10" style={{ animationDelay: '380ms' }}>
+            <CtaButton cta={primaryCta} variant="gradient" />
+          </div>
+        ) : null}
       </div>
     </section>
   )

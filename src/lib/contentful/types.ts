@@ -48,6 +48,27 @@ export type HomeTrackRecordSkeleton = EntrySkeletonType & {
   }
 }
 
+/** Content type id: `homeTestimonials` — "In Their Words" */
+export type HomeTestimonialsSkeleton = EntrySkeletonType & {
+  contentTypeId: 'homeTestimonials'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    /** Long text storing a JSON array of quote items */
+    quotes: EntryFieldTypes.Text
+    story: EntryFieldTypes.Text
+  }
+}
+
+/** Content type id: `homeCtaBanner` — home ready CTA above the footer */
+export type HomeCtaBannerSkeleton = EntrySkeletonType & {
+  contentTypeId: 'homeCtaBanner'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    description: EntryFieldTypes.Text
+    ctaHref?: EntryFieldTypes.Symbol
+  }
+}
+
 /** @deprecated Prefer per-section types; kept until remaining home sections are modeled. */
 export type HomePageSkeleton = EntrySkeletonType & {
   contentTypeId: 'homePage'
@@ -71,6 +92,55 @@ export type HomePageSkeleton = EntrySkeletonType & {
   }
 }
 
+/** Content type id: `aboutTextblock` — "Why We Exist" */
+export type AboutTextblockSkeleton = EntrySkeletonType & {
+  contentTypeId: 'aboutTextblock'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    description: EntryFieldTypes.RichText
+  }
+}
+
+/** Content type id: `aboutMission` */
+export type AboutMissionSkeleton = EntrySkeletonType & {
+  contentTypeId: 'aboutMission'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    description: EntryFieldTypes.Text
+  }
+}
+
+/** Content type id: `aboutBelief` */
+export type AboutBeliefSkeleton = EntrySkeletonType & {
+  contentTypeId: 'aboutBelief'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    beliefsIntro: EntryFieldTypes.Text
+    beliefsList: EntryFieldTypes.RichText
+  }
+}
+
+/** Content type id: `aboutDifferenceBlock` — "What Makes Us Different" */
+export type AboutDifferenceBlockSkeleton = EntrySkeletonType & {
+  contentTypeId: 'aboutDifferenceBlock'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    description: EntryFieldTypes.RichText
+    quotes?: EntryFieldTypes.Text
+  }
+}
+
+/** Content type id: `aboutLeadership` — "Leadership" */
+export type AboutLeadershipSkeleton = EntrySkeletonType & {
+  contentTypeId: 'aboutLeadership'
+  fields: {
+    leadershipTitle: EntryFieldTypes.Symbol
+    /** Object field storing the leadership list payload. */
+    title: EntryFieldTypes.Object
+  }
+}
+
+/** @deprecated Prefer per-section types; kept until remaining about sections are modeled. */
 export type AboutPageSkeleton = EntrySkeletonType & {
   contentTypeId: 'aboutPage'
   fields: {
@@ -107,6 +177,23 @@ export type ProgramsPageSkeleton = EntrySkeletonType & {
   }
 }
 
+/** Content type id: `programs` */
+export type ProgramsSkeleton = EntrySkeletonType & {
+  contentTypeId: 'programs'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    tag?: EntryFieldTypes.Symbol
+    date: EntryFieldTypes.Date
+    summary: EntryFieldTypes.Text
+    location: EntryFieldTypes.Symbol
+    status: EntryFieldTypes.Symbol
+    eventDetailTitle: EntryFieldTypes.Symbol
+    description: EntryFieldTypes.RichText
+    eventDetails?: EntryFieldTypes.RichText
+    media?: EntryFieldTypes.Array<EntryFieldTypes.AssetLink>
+  }
+}
+
 export type EventSkeleton = EntrySkeletonType & {
   contentTypeId: 'event'
   fields: {
@@ -129,46 +216,26 @@ export type EventSkeleton = EntrySkeletonType & {
   }
 }
 
-export type GetInvolvedPageSkeleton = EntrySkeletonType & {
-  contentTypeId: 'getInvolvedPage'
+export type GetInvolvedSkeleton = EntrySkeletonType & {
+  contentTypeId: 'getInvolved'
   fields: {
     title: EntryFieldTypes.Symbol
-    intro: EntryFieldTypes.Text
-    pathways: EntryFieldTypes.Object
-    ctaTitle: EntryFieldTypes.Symbol
-    ctaPrimaryLabel: EntryFieldTypes.Symbol
-    ctaPrimaryHref: EntryFieldTypes.Symbol
-    ctaSecondaryLabel?: EntryFieldTypes.Symbol
-    ctaSecondaryHref?: EntryFieldTypes.Symbol
-    ctaTone?: EntryFieldTypes.Symbol
+    description: EntryFieldTypes.Text
   }
 }
 
-export type ContactPageSkeleton = EntrySkeletonType & {
-  contentTypeId: 'contactPage'
+export type ContactSkeleton = EntrySkeletonType & {
+  contentTypeId: 'contact'
   fields: {
     title: EntryFieldTypes.Symbol
-    intro: EntryFieldTypes.Symbol
-    phoneLabel: EntryFieldTypes.Symbol
-    phone: EntryFieldTypes.Symbol
-    locationLabel: EntryFieldTypes.Symbol
-    location: EntryFieldTypes.Symbol
-    followLabel: EntryFieldTypes.Symbol
-    socials: EntryFieldTypes.Object
-    pressNote: EntryFieldTypes.Text
+    description: EntryFieldTypes.RichText
   }
 }
 
-export type FaqPageSkeleton = EntrySkeletonType & {
-  contentTypeId: 'faqPage'
+export type FaqSkeleton = EntrySkeletonType & {
+  contentTypeId: 'faq'
   fields: {
-    title?: EntryFieldTypes.Symbol
-    items: EntryFieldTypes.Object
-    ctaTitle: EntryFieldTypes.Symbol
-    ctaPrimaryLabel: EntryFieldTypes.Symbol
-    ctaPrimaryHref: EntryFieldTypes.Symbol
-    ctaSecondaryLabel?: EntryFieldTypes.Symbol
-    ctaSecondaryHref?: EntryFieldTypes.Symbol
-    ctaTone?: EntryFieldTypes.Symbol
+    title: EntryFieldTypes.Symbol
+    description: EntryFieldTypes.Text
   }
 }

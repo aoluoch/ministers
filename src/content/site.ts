@@ -1,4 +1,3 @@
-import { getRegisterFormUrl } from '@/lib/register'
 import type { SiteContent } from '@/types/content'
 
 export const siteContent: SiteContent = {
@@ -8,7 +7,6 @@ export const siteContent: SiteContent = {
   logoAlt: "Young Ministers' Summit logo",
   registerCtaHref: '/programs',
   registerCtaLabel: 'Register for the Summit',
-  registerFormUrl: getRegisterFormUrl(),
   nav: [
     { label: 'Home', href: '/' },
     { label: 'About', href: '/about' },
@@ -17,7 +15,7 @@ export const siteContent: SiteContent = {
     { label: 'Contact', href: '/contact' },
     { label: 'FAQ', href: '/faq' },
   ],
-  phone: '[Insert phone number]',
+  phone: '0705053784',
   location: 'Grace Arena Ministries, Bungoma Rd, Off Baricho Rd.',
   socials: [
     {

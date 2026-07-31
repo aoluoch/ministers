@@ -105,6 +105,7 @@ export type EventCoverImage = {
 export type EventItem = {
   slug: string
   title: string
+  detailTitle?: string
   cadence: string
   status: 'upcoming' | 'ongoing' | 'past'
   summary: string
@@ -139,6 +140,7 @@ export type EventDetailHeroProps = {
 }
 
 export type EventDetailBodyProps = {
+  title?: string
   summary: string
   body: string[]
   highlights?: string[]
@@ -163,7 +165,7 @@ export type InvolvePathwaysProps = {
 
 export type ContactDetailsProps = {
   title: string
-  intro: string
+  intro: string[]
   phoneLabel: string
   phone: string
   locationLabel: string
@@ -201,8 +203,6 @@ export type SiteContent = {
   /** Marketing “Register” CTAs — sends users to Programs to learn about the Summit. */
   registerCtaHref: string
   registerCtaLabel: string
-  /** Google Form URL for actual signup (used on the Summit event detail page). */
-  registerFormUrl: string
   nav: SiteNavLink[]
   phone: string
   location: string

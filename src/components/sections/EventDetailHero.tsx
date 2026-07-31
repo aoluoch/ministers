@@ -82,12 +82,12 @@ export function EventDetailHero({
           ) : null}
         </div>
 
-        <div className="animate-fade-in relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-full ring-2 ring-brand-peach/40 lg:mx-0 lg:max-w-none lg:justify-self-end">
+        <div className="animate-fade-in relative mx-auto flex aspect-[4/3] w-full max-w-xl items-center justify-center overflow-hidden rounded-lg bg-brand-purple-deep/60 ring-2 ring-brand-peach/40 lg:mx-0 lg:justify-self-end">
           {coverImage ? (
             <img
               src={coverImage.src}
               alt={coverImage.alt}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-brand-purple-deep font-display text-brand-beige">
