@@ -396,6 +396,27 @@ function asEventStatus(value: unknown): EventItem['status'] {
   return 'upcoming'
 }
 
+function asEventStatusFromDate(
+  dateValue: unknown,
+  statusValue: unknown,
+  today = new Date(),
+): EventItem['status'] {
+  const fallbackStatus = asEventStatus(statusValue)
+  if (typeof dateValue !== 'string' || !dateValue.trim()) return fallbackStatus
+
+  const eventDate = new Date(dateValue)
+  if (Number.isNaN(eventDate.getTime())) return fallbackStatus
+
+  const eventDay = new Date(
+    eventDate.getUTCFullYear(),
+    eventDate.getUTCMonth(),
+    eventDate.getUTCDate(),
+  )
+  const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+  return eventDay < todayDay ? 'past' : fallbackStatus
+}
+
 function asSlug(value: string): string {
   return value
     .toLowerCase()
@@ -474,7 +495,7 @@ export function mapProgram(
     title,
     detailTitle: asOptionalString(f.eventDetailTitle),
     cadence: asString(f.tag),
-    status: asEventStatus(f.status),
+    status: asEventStatusFromDate(f.date, f.status),
     summary: asString(f.summary),
     dateLabel: asDateLabel(f.date),
     location: asString(f.location),
