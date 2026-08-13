@@ -7,10 +7,12 @@ import {
   fetchFaqPage,
   fetchGetInvolvedPage,
   fetchHomePage,
+  fetchJourneyPage,
   fetchProgramsPage,
 } from '@/lib/contentful'
 import { HomePage } from '@/pages/HomePage'
 import { AboutPage } from '@/pages/AboutPage'
+import { JourneyPage } from '@/pages/JourneyPage'
 import { ProgramsPage } from '@/pages/ProgramsPage'
 import { EventDetailPage } from '@/pages/EventDetailPage'
 import { GetInvolvedPage } from '@/pages/GetInvolvedPage'
@@ -35,6 +37,11 @@ const router = createBrowserRouter([
         path: 'about',
         element: <AboutPage />,
         loader: () => fetchAboutPage(),
+      },
+      {
+        path: 'journey',
+        element: <JourneyPage />,
+        loader: () => fetchJourneyPage(),
       },
       {
         path: 'programs',

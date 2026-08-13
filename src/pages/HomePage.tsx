@@ -1,6 +1,9 @@
 import { useLoaderData } from 'react-router-dom'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { TextBlock } from '@/components/sections/TextBlock'
+import { JourneyPillars } from '@/components/sections/JourneyPillars'
+import { ExploreLinks } from '@/components/sections/ExploreLinks'
+import { GlobalPresence } from '@/components/sections/GlobalPresence'
 import { TrackRecord } from '@/components/sections/TrackRecord'
 import { Testimonials } from '@/components/sections/Testimonials'
 import { CtaBanner } from '@/components/sections/CtaBanner'
@@ -13,7 +16,9 @@ export function HomePage() {
     <>
       <HeroSection {...c.hero} />
       <TextBlock {...c.about} />
-      {/* Explore links are temporarily hidden until the Contentful content is ready. */}
+      <JourneyPillars {...c.journey} />
+      <ExploreLinks {...c.explore} />
+      <GlobalPresence {...c.presence} />
       <TrackRecord {...c.trackRecord} />
       <Testimonials {...c.testimonials} />
       <CtaBanner {...c.readyCta} />

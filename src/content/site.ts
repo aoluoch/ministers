@@ -1,15 +1,16 @@
 import type { SiteContent } from '@/types/content'
 
 export const siteContent: SiteContent = {
-  name: "Young Ministers' Summit",
-  shortName: 'YMS',
-  logoSrc: '/ymlogo.jpg',
-  logoAlt: "Young Ministers' Summit logo",
-  registerCtaHref: '/programs',
-  registerCtaLabel: 'Register for the Summit',
+  name: 'Young Ministers Movement',
+  shortName: 'YMM',
+  logoSrc: '/newlogo.jpeg',
+  logoAlt: 'Young Ministers Movement logo',
+  registerCtaHref: '/get-involved',
+  registerCtaLabel: 'Join the Movement',
   nav: [
     { label: 'Home', href: '/' },
     { label: 'About', href: '/about' },
+    { label: 'Journey', href: '/journey' },
     { label: 'Programs', href: '/programs' },
     { label: 'Get Involved', href: '/get-involved' },
     { label: 'Contact', href: '/contact' },
@@ -35,5 +36,5 @@ export const siteContent: SiteContent = {
     },
   ],
   footerTagline:
-    'Mentoring, equipping, and walking with young ministers of the gospel — so you finish well.',
+    'Raising ministers of the gospel who are fully equipped to operate and minister the gospel globally.',
 }

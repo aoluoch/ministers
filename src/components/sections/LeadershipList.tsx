@@ -17,6 +17,13 @@ export function LeadershipList({ title, leaders }: LeadershipListProps) {
             {leaders.map((leader, index) => (
               <Reveal key={`${leader.role}-${leader.name}`} delayMs={index * 40}>
                 <li className="rounded-lg border border-brand-purple/10 bg-card/70 p-5 shadow-sm">
+                  {leader.photo ? (
+                    <img
+                      src={leader.photo.src}
+                      alt={leader.photo.alt}
+                      className="mb-4 h-16 w-16 rounded-full object-cover ring-2 ring-brand-peach/40"
+                    />
+                  ) : null}
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-peach">
                     {leader.role}
                   </p>

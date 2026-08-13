@@ -15,6 +15,7 @@ export type HeroSectionSkeleton = EntrySkeletonType & {
     heroSupportingLine: EntryFieldTypes.Symbol
     heroCtaLabel?: EntryFieldTypes.Symbol
     heroCtaHref?: EntryFieldTypes.Symbol
+    heroImage?: EntryFieldTypes.AssetLink
   }
 }
 
@@ -25,6 +26,7 @@ export type HomeTextBlockSkeleton = EntrySkeletonType & {
     aboutTitle: EntryFieldTypes.Symbol
     aboutParagraph: EntryFieldTypes.Text
     aboutQuote: EntryFieldTypes.Symbol
+    image?: EntryFieldTypes.AssetLink
   }
 }
 
@@ -65,6 +67,7 @@ export type HomeCtaBannerSkeleton = EntrySkeletonType & {
   fields: {
     title: EntryFieldTypes.Symbol
     description: EntryFieldTypes.Text
+    ctaLabel?: EntryFieldTypes.Symbol
     ctaHref?: EntryFieldTypes.Symbol
   }
 }
@@ -107,6 +110,8 @@ export type AboutMissionSkeleton = EntrySkeletonType & {
   fields: {
     title: EntryFieldTypes.Symbol
     description: EntryFieldTypes.Text
+    visionTitle?: EntryFieldTypes.Symbol
+    visionBody?: EntryFieldTypes.Text
   }
 }
 
@@ -130,13 +135,28 @@ export type AboutDifferenceBlockSkeleton = EntrySkeletonType & {
   }
 }
 
+/** Content type id: `leader` — reusable person card */
+export type LeaderSkeleton = EntrySkeletonType & {
+  contentTypeId: 'leader'
+  fields: {
+    name: EntryFieldTypes.Symbol
+    role: EntryFieldTypes.Symbol
+    affiliation?: EntryFieldTypes.Symbol
+    bio?: EntryFieldTypes.Text
+    photo?: EntryFieldTypes.AssetLink
+    sortOrder?: EntryFieldTypes.Integer
+  }
+}
+
 /** Content type id: `aboutLeadership` — "Leadership" */
 export type AboutLeadershipSkeleton = EntrySkeletonType & {
   contentTypeId: 'aboutLeadership'
   fields: {
     leadershipTitle: EntryFieldTypes.Symbol
-    /** Object field storing the leadership list payload. */
+    /** Object field storing the leadership list payload (legacy). */
     title: EntryFieldTypes.Object
+    /** Preferred: linked `leader` entries. */
+    leaders?: EntryFieldTypes.Array<EntryFieldTypes.EntryLink<LeaderSkeleton>>
   }
 }
 
@@ -224,11 +244,29 @@ export type GetInvolvedSkeleton = EntrySkeletonType & {
   }
 }
 
+/** Content type id: `getInvolvedPage` — page chrome for Get Involved */
+export type GetInvolvedPageSkeleton = EntrySkeletonType & {
+  contentTypeId: 'getInvolvedPage'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    intro: EntryFieldTypes.Text
+    ctaTitle?: EntryFieldTypes.Symbol
+    ctaBody?: EntryFieldTypes.Text
+    ctaLabel?: EntryFieldTypes.Symbol
+    ctaHref?: EntryFieldTypes.Symbol
+  }
+}
+
 export type ContactSkeleton = EntrySkeletonType & {
   contentTypeId: 'contact'
   fields: {
     title: EntryFieldTypes.Symbol
     description: EntryFieldTypes.RichText
+    phoneLabel?: EntryFieldTypes.Symbol
+    phone?: EntryFieldTypes.Symbol
+    locationLabel?: EntryFieldTypes.Symbol
+    location?: EntryFieldTypes.Symbol
+    pressNote?: EntryFieldTypes.Text
   }
 }
 
@@ -237,5 +275,112 @@ export type FaqSkeleton = EntrySkeletonType & {
   fields: {
     title: EntryFieldTypes.Symbol
     description: EntryFieldTypes.Text
+  }
+}
+
+/** Content type id: `faqPage` — page chrome for FAQ */
+export type FaqPageSkeleton = EntrySkeletonType & {
+  contentTypeId: 'faqPage'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    ctaTitle?: EntryFieldTypes.Symbol
+    ctaBody?: EntryFieldTypes.Text
+    ctaLabel?: EntryFieldTypes.Symbol
+    ctaHref?: EntryFieldTypes.Symbol
+  }
+}
+
+/** Content type id: `aboutCtaBanner` */
+export type AboutCtaBannerSkeleton = EntrySkeletonType & {
+  contentTypeId: 'aboutCtaBanner'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    description: EntryFieldTypes.Text
+    ctaLabel?: EntryFieldTypes.Symbol
+    ctaHref?: EntryFieldTypes.Symbol
+  }
+}
+
+/** Content type id: `journeyPillar` — one of the Four Bs */
+export type JourneyPillarSkeleton = EntrySkeletonType & {
+  contentTypeId: 'journeyPillar'
+  fields: {
+    name: EntryFieldTypes.Symbol
+    number: EntryFieldTypes.Integer
+    question: EntryFieldTypes.Symbol
+    statement: EntryFieldTypes.Symbol
+    summary: EntryFieldTypes.Text
+    description: EntryFieldTypes.RichText
+    slug?: EntryFieldTypes.Symbol
+    sortOrder?: EntryFieldTypes.Integer
+  }
+}
+
+/** Content type id: `journeyPage` — Journey page chrome */
+export type JourneyPageSkeleton = EntrySkeletonType & {
+  contentTypeId: 'journeyPage'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    intro: EntryFieldTypes.Text
+    pillarsTitle?: EntryFieldTypes.Symbol
+    pillarsIntro?: EntryFieldTypes.Text
+    communityTitle?: EntryFieldTypes.Symbol
+    communityIntro?: EntryFieldTypes.Text
+    trainingTitle?: EntryFieldTypes.Symbol
+    trainingIntro?: EntryFieldTypes.Text
+    beyondTitle?: EntryFieldTypes.Symbol
+    beyondBody?: EntryFieldTypes.RichText
+    commissioningTitle?: EntryFieldTypes.Symbol
+    commissioningBody?: EntryFieldTypes.RichText
+    ctaTitle?: EntryFieldTypes.Symbol
+    ctaBody?: EntryFieldTypes.Text
+    ctaLabel?: EntryFieldTypes.Symbol
+    ctaHref?: EntryFieldTypes.Symbol
+  }
+}
+
+/** Content type id: `chapter` — national chapter */
+export type ChapterSkeleton = EntrySkeletonType & {
+  contentTypeId: 'chapter'
+  fields: {
+    country: EntryFieldTypes.Symbol
+    leaderName: EntryFieldTypes.Symbol
+    leaderTitle?: EntryFieldTypes.Symbol
+    bio?: EntryFieldTypes.Text
+    photo?: EntryFieldTypes.AssetLink
+    sortOrder?: EntryFieldTypes.Integer
+  }
+}
+
+/** Content type id: `globalPresence` — section chrome for chapters */
+export type GlobalPresenceSkeleton = EntrySkeletonType & {
+  contentTypeId: 'globalPresence'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    intro: EntryFieldTypes.Text
+    nations?: EntryFieldTypes.Text
+    images?: EntryFieldTypes.Array<EntryFieldTypes.AssetLink>
+  }
+}
+
+/** Content type id: `communityGroup` — Main / Ministry / Mixed group */
+export type CommunityGroupSkeleton = EntrySkeletonType & {
+  contentTypeId: 'communityGroup'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    description: EntryFieldTypes.Text
+    sortOrder?: EntryFieldTypes.Integer
+  }
+}
+
+/** Content type id: `trainingTopic` — curriculum item */
+export type TrainingTopicSkeleton = EntrySkeletonType & {
+  contentTypeId: 'trainingTopic'
+  fields: {
+    title: EntryFieldTypes.Symbol
+    summary: EntryFieldTypes.Text
+    points?: EntryFieldTypes.RichText
+    category: EntryFieldTypes.Symbol
+    sortOrder?: EntryFieldTypes.Integer
   }
 }

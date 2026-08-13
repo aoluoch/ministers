@@ -23,8 +23,8 @@ export function SiteHeader() {
         <Link to="/" className="flex min-w-0 items-center gap-3">
           <img
             src={siteContent.logoSrc}
-            alt={siteContent.logoAlt}
-            className="h-11 w-11 rounded-full object-cover ring-1 ring-brand-peach/40"
+            alt=""
+            className="h-11 w-11 rounded-lg object-cover ring-1 ring-brand-peach/35"
           />
           <span className="truncate font-display text-sm font-bold tracking-wide text-brand-cream sm:text-base">
             {siteContent.name}

@@ -22,7 +22,7 @@ export function DifferenceBlock({ title, paragraphs, quotes }: DifferenceBlockPr
             {quotes.map((quote) => (
               <blockquote
                 key={quote}
-                className="font-display text-lg font-semibold text-brand-purple sm:text-xl"
+                className="font-serif text-lg italic text-brand-purple sm:text-xl"
               >
                 “{quote}”
               </blockquote>

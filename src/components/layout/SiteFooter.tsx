@@ -12,8 +12,8 @@ export function SiteFooter() {
             <div className="flex items-center gap-3">
               <img
                 src={siteContent.logoSrc}
-                alt={siteContent.logoAlt}
-                className="h-12 w-12 rounded-full object-cover ring-1 ring-brand-peach/40"
+                alt=""
+                className="h-12 w-12 rounded-lg object-cover ring-1 ring-brand-peach/35"
               />
               <p className="font-display text-lg font-bold">{siteContent.name}</p>
             </div>

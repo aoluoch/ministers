@@ -27,7 +27,7 @@ export function EventDetailHero({
         className="pointer-events-none absolute inset-0 opacity-35"
         style={{
           backgroundImage:
-            'radial-gradient(ellipse 70% 55% at 85% 20%, rgba(236,179,120,0.35), transparent 55%)',
+            'radial-gradient(ellipse 70% 55% at 85% 20%, rgba(253,209,50,0.22), transparent 55%)',
         }}
       />
       <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-16">

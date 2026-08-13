@@ -1,8 +1,10 @@
-# Young Ministers' Summit
+# Young Ministers Movement
 
-Marketing website for the Young Ministers' Summit — a community that mentors, equips, and walks with young ministers of the gospel.
+Marketing website for the Young Ministers Movement — raising ministers of the gospel who are fully equipped to operate and minister the gospel globally.
 
 Built with **Vite**, **React 19**, **TypeScript**, **Tailwind CSS v4**, **shadcn/ui**, and **React Router**.
+
+Content lives in **Contentful**. Editors: follow [`CONTENTFUL.md`](CONTENTFUL.md) for a page-by-page, step-by-step guide to changing copy and images.
 
 ## Quick start
 
@@ -39,6 +41,7 @@ Fetchers and field adapters live in [`src/lib/contentful/`](src/lib/contentful/)
 |-------|------|
 | `/` | Home |
 | `/about` | About |
+| `/journey` | The Four Bs development journey |
 | `/programs` | Events list (summaries) |
 | `/programs/:slug` | Event detail (description, highlights, photos) |
 | `/get-involved` | Ways to get involved |
@@ -52,7 +55,7 @@ Fetchers and field adapters live in [`src/lib/contentful/`](src/lib/contentful/)
 
 ## Registration flow
 
-1. Site-wide **Register for the Summit** buttons go to **`/programs`** so visitors can read about events first.
+1. Site-wide **Join the Movement** buttons go to **`/get-involved`**.
 2. Event detail CTAs come from Contentful program fields (`registerCtaLabel` and `registerCtaHref`).
 
 Configure the site-wide marketing destination in [`src/content/site.ts`](src/content/site.ts) (`registerCtaHref`).
@@ -75,36 +78,42 @@ src/
   types/          Content prop interfaces
   lib/            Utilities + Contentful fetchers/mappers
 public/
-  ymlogo.jpg      Brand logo
+  logo1.png       Brand logo
 ```
 
 ## Content architecture (Contentful)
 
-Pages load content via React Router loaders → `src/lib/contentful` fetchers. Page copy is CMS-owned; there are no local page-content modules. When Contentful is unavailable, loaders return empty typed section objects so components can safely render nothing.
+Pages load content via React Router loaders → `src/lib/contentful` fetchers. Page copy is CMS-owned. When a content type is missing, that section renders nothing so you can add types in Contentful gradually.
+
+Full editor guide: [`CONTENTFUL.md`](CONTENTFUL.md).
 
 | Source | Content |
 |--------|---------|
 | Home section singletons (`heroSection`, `homeTextBlock`, etc.) | Home page sections |
+| `journeyPillar` + `journeyPage` | Four Bs on Home and `/journey` |
+| `chapter` + `globalPresence` | Nations and chapter leaders |
 | About section singletons (`aboutTextblock`, `aboutMission`, etc.) | About page sections |
-| `programs` entries | Programs list + detail |
-| `getInvolved`, `contact`, `faq` entries | Get Involved, Contact, FAQ pages |
+| `communityGroup` + `trainingTopic` | Journey page community + curriculum |
+| `programs` + `programsPage` | Programs list + detail |
+| `getInvolved` + `getInvolvedPage` | Get Involved |
+| `contact`, `faq` + `faqPage` | Contact and FAQ |
 | `src/content/site.ts` | Nav, logo, footer, socials |
-| Asset fields on the same entry | Cover images + event gallery photos |
 
-Section components stay presentational — adapters map Contentful fields → [`src/types/content.ts`](src/types/content.ts). No entry-reference resolution.
+Section components stay presentational — adapters map Contentful fields → [`src/types/content.ts`](src/types/content.ts).
 
 ## Brand
 
 | Token | Hex | Role |
 |-------|-----|------|
-| Purple | `#6E2D77` | Primary surfaces, hero, footer |
-| Peach | `#ECB378` | Gradient start, accents |
-| Beige | `#F3D3B3` | Gradient midpoint |
-| Cream | `#FFF1E4` | Light backgrounds, text on purple |
+| Navy | `#1a264e` | Primary surfaces, hero, footer (`brand-purple` in CSS) |
+| Deep navy | `#10182f` | Darker surfaces |
+| Gold | `#c9a574` | Accents (`brand-peach` in CSS) |
+| Beige | `#e8d4b8` | Gradient midpoint |
+| Cream | `#fce8cf` | Light text on navy |
 
 CSS utilities: `bg-summit-gradient`, `text-summit-gradient`, `btn-summit-gradient`.
 
-Fonts: **Plus Jakarta Sans** (display) and **Source Sans 3** (body).
+Fonts: **Montserrat** (display), **Playfair Display** (italic quotes / Four Bs), **Source Sans 3** (body).
 
 ## Placeholders to replace later
 

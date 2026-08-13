@@ -16,7 +16,7 @@ export function Testimonials({ title, quotes, story }: TestimonialsProps) {
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {quotes.map((item, index) => (
               <Reveal key={item.quote} delayMs={index * 90}>
-                <blockquote className="border-l-4 border-brand-peach pl-4 font-display text-lg font-semibold leading-snug text-brand-purple">
+                <blockquote className="border-l-4 border-brand-peach pl-4 font-serif text-lg italic leading-snug text-brand-purple">
                   “{item.quote}”
                 </blockquote>
               </Reveal>

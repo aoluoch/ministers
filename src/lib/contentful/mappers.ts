@@ -3,6 +3,8 @@ import { siteContent } from '@/content/site'
 import type {
   AboutPageContent,
   BeliefsListProps,
+  ChapterItem,
+  CommunityGroup,
   ContactPageContent,
   EventItem,
   ExploreItem,
@@ -11,8 +13,12 @@ import type {
   CtaBannerProps,
   DifferenceBlockProps,
   ExploreLinksProps,
+  GlobalPresenceProps,
   HeroSectionProps,
   HomePageContent,
+  JourneyPageContent,
+  JourneyPillar,
+  JourneySectionProps,
   LeaderItem,
   LeadershipListProps,
   MissionBlockProps,
@@ -20,9 +26,12 @@ import type {
   TestimonialsProps,
   TextBlockProps,
   TrackRecordProps,
+  TrainingTopic,
 } from '@/types/content'
 import {
+  asAssetImage,
   asCta,
+  asInteger,
   asJsonArray,
   asOptionalString,
   asParagraphs,
@@ -37,15 +46,21 @@ import {
 } from './helpers'
 import type {
   AboutBeliefSkeleton,
+  AboutCtaBannerSkeleton,
   AboutDifferenceBlockSkeleton,
   AboutLeadershipSkeleton,
   AboutMissionSkeleton,
   AboutPageSkeleton,
   AboutTextblockSkeleton,
+  ChapterSkeleton,
+  CommunityGroupSkeleton,
   ContactSkeleton,
   EventSkeleton,
+  FaqPageSkeleton,
   FaqSkeleton,
+  GetInvolvedPageSkeleton,
   GetInvolvedSkeleton,
+  GlobalPresenceSkeleton,
   HeroSectionSkeleton,
   HomeCtaBannerSkeleton,
   HomeExploreLinksSkeleton,
@@ -53,8 +68,12 @@ import type {
   HomeTestimonialsSkeleton,
   HomeTextBlockSkeleton,
   HomeTrackRecordSkeleton,
+  JourneyPageSkeleton,
+  JourneyPillarSkeleton,
+  LeaderSkeleton,
   ProgramsPageSkeleton,
   ProgramsSkeleton,
+  TrainingTopicSkeleton,
 } from './types'
 
 export function mapHeroSection(
@@ -70,6 +89,7 @@ export function mapHeroSection(
       label: 'Register',
       href: '/programs',
     },
+    image: asAssetImage(f.heroImage as Asset | undefined, asString(f.heroBrandName)),
   }
 }
 
@@ -81,6 +101,7 @@ export function mapHomeTextBlock(
     title: asString(f.aboutTitle),
     paragraphs: asParagraphs(f.aboutParagraph),
     quote: asString(f.aboutQuote),
+    image: asAssetImage(f.image as Asset | undefined, asString(f.aboutTitle)),
   }
 }
 
@@ -124,9 +145,9 @@ export function mapHomeCtaBanner(
   return {
     title: asString(f.title),
     body: asOptionalString(f.description),
-    primaryCta: {
-      label: 'View Our Programs',
-      href: '/programs',
+    primaryCta: asCta(f.ctaLabel, f.ctaHref) ?? {
+      label: 'Join the Movement',
+      href: '/get-involved',
     },
     tone: 'purple',
   }
@@ -145,9 +166,21 @@ export function mapHomePageRest(
       paragraphs: asParagraphs(f.aboutParagraphs),
       quote: asOptionalString(f.aboutQuote),
     },
+    journey: {
+      title: 'The Four Bs',
+      intro: '',
+      pillars: [],
+    },
     explore: {
       title: asString(f.exploreTitle),
       items: asJsonArray<ExploreItem>(f.exploreItems),
+    },
+    presence: {
+      title: '',
+      intro: '',
+      nations: [],
+      images: [],
+      chapters: [],
     },
     trackRecord: {
       title: asString(f.trackRecordTitle),
@@ -185,6 +218,8 @@ export function mapAboutMission(
   return {
     title: asString(f.title),
     body: asString(f.description),
+    visionTitle: asOptionalString(f.visionTitle),
+    visionBody: asOptionalString(f.visionBody),
   }
 }
 
@@ -283,8 +318,32 @@ function asExploreTextBlock(block: string): ExploreItem | null {
   })
 }
 
+function isEntryLike(value: unknown): value is Entry<LeaderSkeleton, undefined, string> {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      'fields' in value &&
+      'sys' in value,
+  )
+}
+
 function asLeader(value: unknown): LeaderItem | null {
   if (!value || typeof value !== 'object') return null
+
+  if (isEntryLike(value)) {
+    const f = fieldsOf(value)
+    const role = asString(f.role).trim()
+    const name = asString(f.name).trim()
+    if (!role || !name) return null
+    return {
+      role,
+      name,
+      affiliation: asOptionalString(f.affiliation),
+      bio: asOptionalString(f.bio),
+      photo: asAssetImage(f.photo as Asset | undefined, name),
+    }
+  }
+
   const item = value as Record<string, unknown>
   const role = asString(item.role).trim()
   const name = asString(item.name).trim()
@@ -327,9 +386,10 @@ export function mapAboutLeadership(
   entry: Entry<AboutLeadershipSkeleton, undefined, string>,
 ): LeadershipListProps {
   const f = fieldsOf(entry)
+  const linked = asLeaders(f.leaders)
   return {
     title: asString(f.leadershipTitle),
-    leaders: asLeaders(f.title),
+    leaders: linked.length ? linked : asLeaders(f.title),
   }
 }
 
@@ -359,6 +419,13 @@ export function mapAboutPage(
       quotes: asJsonArray<string | { text: string }>(f.differenceQuotes).map(
         (q) => (typeof q === 'string' ? q : asString(q.text)),
       ),
+    },
+    presence: {
+      title: '',
+      intro: '',
+      nations: [],
+      images: [],
+      chapters: [],
     },
     leadership: {
       title: asString(f.leadershipTitle),
@@ -525,11 +592,13 @@ export function mapProgram(
 
 export function mapGetInvolvedPage(
   entries: Entry<GetInvolvedSkeleton, undefined, string>[],
+  page?: Entry<GetInvolvedPageSkeleton, undefined, string> | null,
 ): GetInvolvedPageContent {
+  const chrome = page ? fieldsOf(page) : undefined
   return {
     pathways: {
-      title: '',
-      intro: '',
+      title: asString(chrome?.title),
+      intro: asString(chrome?.intro),
       pathways: entries
         .map((entry) => {
           const f = fieldsOf(entry)
@@ -541,8 +610,9 @@ export function mapGetInvolvedPage(
         .filter((item) => item.title || item.description),
     },
     readyCta: {
-      title: '',
-      primaryCta: { label: '', href: '' },
+      title: asString(chrome?.ctaTitle),
+      body: asOptionalString(chrome?.ctaBody),
+      primaryCta: asCta(chrome?.ctaLabel, chrome?.ctaHref) ?? { label: '', href: '' },
       tone: 'purple',
     },
   }
@@ -556,23 +626,25 @@ export function mapContactPage(
     details: {
       title: asString(f.title),
       intro: asRichTextParagraphs(f.description),
-      phoneLabel: '',
-      phone: '',
-      locationLabel: '',
-      location: '',
+      phoneLabel: asString(f.phoneLabel, 'Phone'),
+      phone: asString(f.phone) || siteContent.phone,
+      locationLabel: asString(f.locationLabel, 'Location'),
+      location: asString(f.location) || siteContent.location,
       followLabel: 'Follow us',
       socials: siteContent.socials,
-      pressNote: '',
+      pressNote: asString(f.pressNote),
     },
   }
 }
 
 export function mapFaqPage(
   entries: Entry<FaqSkeleton, undefined, string>[],
+  page?: Entry<FaqPageSkeleton, undefined, string> | null,
 ): FaqPageContent {
+  const chrome = page ? fieldsOf(page) : undefined
   return {
     faq: {
-      title: '',
+      title: asString(chrome?.title),
       items: entries
         .map((entry) => {
           const f = fieldsOf(entry)
@@ -584,9 +656,161 @@ export function mapFaqPage(
         .filter((item) => item.question || item.answer),
     },
     cta: {
-      title: '',
-      primaryCta: { label: '', href: '' },
+      title: asString(chrome?.ctaTitle),
+      body: asOptionalString(chrome?.ctaBody),
+      primaryCta: asCta(chrome?.ctaLabel, chrome?.ctaHref) ?? { label: '', href: '' },
       tone: 'purple',
     },
+  }
+}
+
+export function mapAboutCtaBanner(
+  entry: Entry<AboutCtaBannerSkeleton, undefined, string>,
+): CtaBannerProps {
+  const f = fieldsOf(entry)
+  return {
+    title: asString(f.title),
+    body: asOptionalString(f.description),
+    primaryCta: asCta(f.ctaLabel, f.ctaHref) ?? {
+      label: 'Get involved',
+      href: '/get-involved',
+    },
+    tone: 'purple',
+  }
+}
+
+export function mapJourneyPillar(
+  entry: Entry<JourneyPillarSkeleton, undefined, string>,
+): JourneyPillar {
+  const f = fieldsOf(entry)
+  const name = asString(f.name)
+  return {
+    slug: asOptionalString(f.slug) || asSlug(name || entry.sys.id),
+    name,
+    number: asInteger(f.number, asInteger(f.sortOrder, 0)),
+    question: asString(f.question),
+    statement: asString(f.statement),
+    summary: asString(f.summary),
+    description: asRichTextParagraphs(f.description),
+  }
+}
+
+export function mapJourneySection(
+  pillars: JourneyPillar[],
+  page?: Entry<JourneyPageSkeleton, undefined, string> | null,
+): JourneySectionProps {
+  const chrome = page ? fieldsOf(page) : undefined
+  return {
+    title: asString(chrome?.pillarsTitle, 'The Four Bs'),
+    intro: asString(chrome?.pillarsIntro),
+    pillars,
+  }
+}
+
+export function mapJourneyPage(
+  page: Entry<JourneyPageSkeleton, undefined, string> | null,
+  pillars: JourneyPillar[],
+  groups: CommunityGroup[],
+  topics: TrainingTopic[],
+): JourneyPageContent {
+  const f = page ? fieldsOf(page) : undefined
+  return {
+    intro: {
+      title: asString(f?.title, 'The Journey'),
+      paragraphs: asParagraphs(f?.intro),
+    },
+    pillars: mapJourneySection(pillars, page),
+    community: {
+      title: groups.length ? asString(f?.communityTitle, 'How community works') : asString(f?.communityTitle),
+      intro: asString(f?.communityIntro),
+      groups,
+    },
+    training: {
+      title: topics.length ? asString(f?.trainingTitle, 'The training programme') : asString(f?.trainingTitle),
+      intro: asString(f?.trainingIntro),
+      topics,
+    },
+    beyond: {
+      title: asString(f?.beyondTitle),
+      paragraphs: asRichTextParagraphs(f?.beyondBody),
+    },
+    commissioning: {
+      title: asString(f?.commissioningTitle),
+      paragraphs: asRichTextParagraphs(f?.commissioningBody),
+    },
+    cta: {
+      title: asString(f?.ctaTitle),
+      body: asOptionalString(f?.ctaBody),
+      primaryCta: asCta(f?.ctaLabel, f?.ctaHref) ?? {
+        label: 'Get involved',
+        href: '/get-involved',
+      },
+      tone: 'purple',
+    },
+  }
+}
+
+export function mapChapter(
+  entry: Entry<ChapterSkeleton, undefined, string>,
+): ChapterItem {
+  const f = fieldsOf(entry)
+  const country = asString(f.country)
+  const leaderName = asString(f.leaderName)
+  return {
+    country,
+    leaderName,
+    leaderTitle: asOptionalString(f.leaderTitle),
+    bio: asOptionalString(f.bio),
+    photo: asAssetImage(f.photo as Asset | undefined, leaderName || country),
+  }
+}
+
+export function mapGlobalPresence(
+  page: Entry<GlobalPresenceSkeleton, undefined, string> | null,
+  chapters: ChapterItem[],
+): GlobalPresenceProps {
+  const f = page ? fieldsOf(page) : undefined
+  const fromField = asTextList(f?.nations)
+  const fromChapters = chapters
+    .map((chapter) => chapter.country.trim())
+    .filter(Boolean)
+    .filter((country, index, list) => list.indexOf(country) === index)
+  const images = (Array.isArray(f?.images) ? f.images : []) as Asset[]
+
+  return {
+    title: asString(f?.title, 'A global movement'),
+    intro: asString(f?.intro),
+    nations: fromField.length ? fromField : fromChapters,
+    images: images
+      .map((asset) => asAssetImage(asset, asString(f?.title, 'Nation')))
+      .filter((image): image is NonNullable<typeof image> => Boolean(image)),
+    chapters,
+  }
+}
+
+export function mapCommunityGroup(
+  entry: Entry<CommunityGroupSkeleton, undefined, string>,
+): CommunityGroup {
+  const f = fieldsOf(entry)
+  return {
+    title: asString(f.title),
+    description: asString(f.description),
+  }
+}
+
+function asTrainingCategory(value: unknown): TrainingTopic['category'] {
+  const category = typeof value === 'string' ? value.trim().toLowerCase() : ''
+  return category === 'specialised' || category === 'specialized' ? 'specialised' : 'fundamental'
+}
+
+export function mapTrainingTopic(
+  entry: Entry<TrainingTopicSkeleton, undefined, string>,
+): TrainingTopic {
+  const f = fieldsOf(entry)
+  return {
+    title: asString(f.title),
+    summary: asString(f.summary),
+    points: asRichTextParagraphs(f.points),
+    category: asTrainingCategory(f.category),
   }
 }

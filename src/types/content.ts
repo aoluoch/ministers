@@ -11,6 +11,7 @@ export type HeroSectionProps = {
   body: string
   supportingLine: string
   primaryCta: CtaLink
+  image?: EventCoverImage
 }
 
 export type TextBlockProps = {
@@ -18,6 +19,7 @@ export type TextBlockProps = {
   title: string
   paragraphs: string[]
   quote?: string
+  image?: EventCoverImage
 }
 
 export type ExploreItem = {
@@ -59,6 +61,8 @@ export type CtaBannerProps = {
 export type MissionBlockProps = {
   title: string
   body: string
+  visionTitle?: string
+  visionBody?: string
 }
 
 export type BeliefItem = {
@@ -83,6 +87,7 @@ export type LeaderItem = {
   name: string
   affiliation?: string
   bio?: string
+  photo?: EventCoverImage
 }
 
 export type LeadershipListProps = {
@@ -185,6 +190,62 @@ export type FaqAccordionProps = {
   items: FaqItem[]
 }
 
+export type JourneyPillar = {
+  slug: string
+  name: string
+  number: number
+  question: string
+  statement: string
+  summary: string
+  description: string[]
+}
+
+export type JourneySectionProps = {
+  title: string
+  intro: string
+  pillars: JourneyPillar[]
+}
+
+export type ChapterItem = {
+  country: string
+  leaderName: string
+  leaderTitle?: string
+  bio?: string
+  photo?: EventCoverImage
+}
+
+export type GlobalPresenceProps = {
+  title: string
+  intro: string
+  nations: string[]
+  images: EventCoverImage[]
+  chapters: ChapterItem[]
+}
+
+export type CommunityGroup = {
+  title: string
+  description: string
+}
+
+export type CommunityGroupsProps = {
+  title: string
+  intro: string
+  groups: CommunityGroup[]
+}
+
+export type TrainingTopic = {
+  title: string
+  summary: string
+  points: string[]
+  category: 'fundamental' | 'specialised'
+}
+
+export type TrainingSectionProps = {
+  title: string
+  intro: string
+  topics: TrainingTopic[]
+}
+
 export type QuoteBandProps = {
   quote: string
   attribution?: string
@@ -215,7 +276,9 @@ export type SiteContent = {
 export type HomePageContent = {
   hero: HeroSectionProps
   about: TextBlockProps
+  journey: JourneySectionProps
   explore: ExploreLinksProps
+  presence: GlobalPresenceProps
   trackRecord: TrackRecordProps
   testimonials: TestimonialsProps
   readyCta: CtaBannerProps
@@ -226,8 +289,19 @@ export type AboutPageContent = {
   mission: MissionBlockProps
   beliefs: BeliefsListProps
   difference: DifferenceBlockProps
+  presence: GlobalPresenceProps
   leadership: LeadershipListProps
   joinCta: CtaBannerProps
+}
+
+export type JourneyPageContent = {
+  intro: TextBlockProps
+  pillars: JourneySectionProps
+  community: CommunityGroupsProps
+  training: TrainingSectionProps
+  beyond: TextBlockProps
+  commissioning: TextBlockProps
+  cta: CtaBannerProps
 }
 
 export type ProgramsPageContent = {

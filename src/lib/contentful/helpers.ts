@@ -179,6 +179,24 @@ export function asOptionalString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value : undefined
 }
 
+export function asInteger(value: unknown, fallback = 0): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return fallback
+}
+
+export function asAssetImage(
+  asset: Asset | undefined | null,
+  fallbackAlt: string,
+): { src: string; alt: string } | undefined {
+  const src = assetUrl(asset)
+  if (!src) return undefined
+  return { src, alt: assetAlt(asset, fallbackAlt) }
+}
+
 export function asJsonArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) return value as T[]
   // Text fields often store JSON as a string

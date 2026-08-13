@@ -1,3 +1,4 @@
+import { siteContent } from '@/content/site'
 import type {
   AboutPageContent,
   ContactPageContent,
@@ -5,42 +6,62 @@ import type {
   FaqPageContent,
   GetInvolvedPageContent,
   HomePageContent,
+  JourneyPageContent,
   ProgramsPageContent,
 } from '@/types/content'
 import { getContentfulClient, isContentfulConfigured } from './client'
 import {
   mapAboutBelief,
+  mapAboutCtaBanner,
   mapAboutDifferenceBlock,
   mapAboutLeadership,
   mapAboutMission,
   mapAboutTextblock,
+  mapChapter,
+  mapCommunityGroup,
   mapContactPage,
   mapFaqPage,
   mapGetInvolvedPage,
+  mapGlobalPresence,
   mapHeroSection,
   mapHomeCtaBanner,
   mapHomeExploreLinks,
   mapHomeTestimonials,
   mapHomeTextBlock,
   mapHomeTrackRecord,
+  mapJourneyPage,
+  mapJourneyPillar,
+  mapJourneySection,
   mapProgram,
+  mapProgramsPageChrome,
+  mapTrainingTopic,
 } from './mappers'
 import type {
   AboutBeliefSkeleton,
+  AboutCtaBannerSkeleton,
   AboutDifferenceBlockSkeleton,
   AboutLeadershipSkeleton,
   AboutMissionSkeleton,
   AboutTextblockSkeleton,
+  ChapterSkeleton,
+  CommunityGroupSkeleton,
   ContactSkeleton,
+  FaqPageSkeleton,
   FaqSkeleton,
+  GetInvolvedPageSkeleton,
   GetInvolvedSkeleton,
+  GlobalPresenceSkeleton,
   HeroSectionSkeleton,
   HomeCtaBannerSkeleton,
   HomeExploreLinksSkeleton,
   HomeTestimonialsSkeleton,
   HomeTextBlockSkeleton,
   HomeTrackRecordSkeleton,
+  JourneyPageSkeleton,
+  JourneyPillarSkeleton,
+  ProgramsPageSkeleton,
   ProgramsSkeleton,
+  TrainingTopicSkeleton,
 } from './types'
 
 const emptyAboutMission: AboutPageContent['mission'] = {
@@ -70,6 +91,20 @@ const emptyCta = {
   href: '',
 }
 
+const emptyJourney: HomePageContent['journey'] = {
+  title: 'The Four Bs',
+  intro: '',
+  pillars: [],
+}
+
+const emptyPresence: HomePageContent['presence'] = {
+  title: '',
+  intro: '',
+  nations: [],
+  images: [],
+  chapters: [],
+}
+
 const emptyHomePage: HomePageContent = {
   hero: {
     brandName: '',
@@ -82,10 +117,12 @@ const emptyHomePage: HomePageContent = {
     title: '',
     paragraphs: [],
   },
+  journey: emptyJourney,
   explore: {
     title: '',
     items: [],
   },
+  presence: emptyPresence,
   trackRecord: {
     title: '',
     paragraphs: [],
@@ -110,6 +147,7 @@ const emptyAboutPage: AboutPageContent = {
   mission: emptyAboutMission,
   beliefs: emptyAboutBeliefs,
   difference: emptyAboutDifference,
+  presence: emptyPresence,
   leadership: emptyAboutLeadership,
   joinCta: {
     title: '',
@@ -139,13 +177,43 @@ const emptyContactPage: ContactPageContent = {
   details: {
     title: '',
     intro: [],
-    phoneLabel: '',
-    phone: '',
-    locationLabel: '',
-    location: '',
-    followLabel: '',
-    socials: [],
+    phoneLabel: 'Phone',
+    phone: siteContent.phone,
+    locationLabel: 'Location',
+    location: siteContent.location,
+    followLabel: 'Follow us',
+    socials: siteContent.socials,
     pressNote: '',
+  },
+}
+
+const emptyJourneyPage: JourneyPageContent = {
+  intro: {
+    title: '',
+    paragraphs: [],
+  },
+  pillars: emptyJourney,
+  community: {
+    title: '',
+    intro: '',
+    groups: [],
+  },
+  training: {
+    title: '',
+    intro: '',
+    topics: [],
+  },
+  beyond: {
+    title: '',
+    paragraphs: [],
+  },
+  commissioning: {
+    title: '',
+    paragraphs: [],
+  },
+  cta: {
+    title: '',
+    primaryCta: emptyCta,
   },
 }
 
@@ -215,6 +283,31 @@ async function getOptionalSingleton<
   }
 }
 
+async function getOptionalEntries<
+  T extends { contentTypeId: string; fields: Record<string, unknown> },
+>(
+  contentType: T['contentTypeId'],
+  query: Record<string, unknown> = {},
+) {
+  const client = getContentfulClient()
+  if (!client) return []
+
+  try {
+    const res = await client.getEntries({
+      content_type: contentType,
+      limit: 1000,
+      ...query,
+    })
+    return res.items as import('contentful').Entry<T, undefined, string>[]
+  } catch (error) {
+    if (isUnknownContentTypeError(error)) {
+      warnLocalSection(contentType, error)
+      return []
+    }
+    throw error
+  }
+}
+
 async function getAboutTextblockEntry() {
   return getOptionalSingleton<AboutTextblockSkeleton>('aboutTextblock')
 }
@@ -232,13 +325,40 @@ async function getAboutDifferenceBlockEntry() {
 }
 
 async function getAboutLeadershipEntry() {
-  return getOptionalSingleton<AboutLeadershipSkeleton>('aboutLeadership')
+  return getOptionalSingleton<AboutLeadershipSkeleton>('aboutLeadership', {
+    include: 2,
+  })
+}
+
+async function fetchJourneyPillars() {
+  const entries = await getOptionalEntries<JourneyPillarSkeleton>('journeyPillar')
+  return entries.map(mapJourneyPillar).sort((a, b) => a.number - b.number)
+}
+
+async function fetchChapters() {
+  const entries = await getOptionalEntries<ChapterSkeleton>('chapter', { include: 2 })
+  return entries
+    .slice()
+    .sort((a, b) => {
+      const aOrder = typeof a.fields.sortOrder === 'number' ? a.fields.sortOrder : 0
+      const bOrder = typeof b.fields.sortOrder === 'number' ? b.fields.sortOrder : 0
+      return aOrder - bOrder
+    })
+    .map(mapChapter)
+}
+
+async function fetchPresence() {
+  const [presenceEntry, chapters] = await Promise.all([
+    getOptionalSingleton<GlobalPresenceSkeleton>('globalPresence', { include: 2 }),
+    fetchChapters(),
+  ])
+  if (!presenceEntry && !chapters.length) return emptyPresence
+  return mapGlobalPresence(presenceEntry, chapters)
 }
 
 export async function fetchHomePage(): Promise<HomePageContent> {
   if (!isContentfulConfigured()) return emptyHomePage
   try {
-    // Compose home from per-section content types as they come online.
     const [
       heroEntry,
       aboutEntry,
@@ -246,19 +366,29 @@ export async function fetchHomePage(): Promise<HomePageContent> {
       trackRecordEntry,
       testimonialsEntry,
       ctaBannerEntry,
+      journeyPageEntry,
+      pillars,
+      presence,
     ] = await Promise.all([
-      getOptionalSingleton<HeroSectionSkeleton>('heroSection'),
-      getOptionalSingleton<HomeTextBlockSkeleton>('homeTextBlock'),
+      getOptionalSingleton<HeroSectionSkeleton>('heroSection', { include: 2 }),
+      getOptionalSingleton<HomeTextBlockSkeleton>('homeTextBlock', { include: 2 }),
       getOptionalSingleton<HomeExploreLinksSkeleton>('homeEploreLinks'),
       getOptionalSingleton<HomeTrackRecordSkeleton>('homeTrackRecord'),
       getOptionalSingleton<HomeTestimonialsSkeleton>('homeTestimonials'),
       getOptionalSingleton<HomeCtaBannerSkeleton>('homeCtaBanner'),
+      getOptionalSingleton<JourneyPageSkeleton>('journeyPage'),
+      fetchJourneyPillars(),
+      fetchPresence(),
     ])
 
     return {
       hero: heroEntry ? mapHeroSection(heroEntry) : emptyHomePage.hero,
       about: aboutEntry ? mapHomeTextBlock(aboutEntry) : emptyHomePage.about,
+      journey: pillars.length
+        ? mapJourneySection(pillars, journeyPageEntry)
+        : emptyJourney,
       explore: exploreEntry ? mapHomeExploreLinks(exploreEntry) : emptyHomePage.explore,
+      presence,
       trackRecord: trackRecordEntry
         ? mapHomeTrackRecord(trackRecordEntry)
         : emptyHomePage.trackRecord,
@@ -276,19 +406,22 @@ export async function fetchHomePage(): Promise<HomePageContent> {
 export async function fetchAboutPage(): Promise<AboutPageContent> {
   if (!isContentfulConfigured()) return emptyAboutPage
   try {
-    // Compose about from per-section content types as they come online.
     const [
       textBlockResult,
       missionEntry,
       beliefEntry,
       differenceEntry,
       leadershipEntry,
+      ctaEntry,
+      presence,
     ] = await Promise.all([
       getAboutTextblockEntry(),
       getAboutMissionEntry(),
       getAboutBeliefEntry(),
       getAboutDifferenceBlockEntry(),
       getAboutLeadershipEntry(),
+      getOptionalSingleton<AboutCtaBannerSkeleton>('aboutCtaBanner'),
+      fetchPresence(),
     ])
 
     return {
@@ -300,14 +433,55 @@ export async function fetchAboutPage(): Promise<AboutPageContent> {
       difference: differenceEntry
         ? mapAboutDifferenceBlock(differenceEntry)
         : emptyAboutDifference,
+      presence,
       leadership: leadershipEntry
         ? mapAboutLeadership(leadershipEntry)
         : emptyAboutLeadership,
-      joinCta: emptyAboutPage.joinCta,
+      joinCta: ctaEntry ? mapAboutCtaBanner(ctaEntry) : emptyAboutPage.joinCta,
     }
   } catch (error) {
     warnContentfulError('aboutPage', error)
     return emptyAboutPage
+  }
+}
+
+export async function fetchJourneyPage(): Promise<JourneyPageContent> {
+  if (!isContentfulConfigured()) return emptyJourneyPage
+  try {
+    const [page, pillars, groupEntries, topicEntries] = await Promise.all([
+      getOptionalSingleton<JourneyPageSkeleton>('journeyPage'),
+      fetchJourneyPillars(),
+      getOptionalEntries<CommunityGroupSkeleton>('communityGroup'),
+      getOptionalEntries<TrainingTopicSkeleton>('trainingTopic'),
+    ])
+
+    if (!page && !pillars.length && !groupEntries.length && !topicEntries.length) {
+      return emptyJourneyPage
+    }
+
+    return mapJourneyPage(
+      page,
+      pillars,
+      groupEntries
+        .slice()
+        .sort((a, b) => {
+          const aOrder = typeof a.fields.sortOrder === 'number' ? a.fields.sortOrder : 0
+          const bOrder = typeof b.fields.sortOrder === 'number' ? b.fields.sortOrder : 0
+          return aOrder - bOrder
+        })
+        .map(mapCommunityGroup),
+      topicEntries
+        .slice()
+        .sort((a, b) => {
+          const aOrder = typeof a.fields.sortOrder === 'number' ? a.fields.sortOrder : 0
+          const bOrder = typeof b.fields.sortOrder === 'number' ? b.fields.sortOrder : 0
+          return aOrder - bOrder
+        })
+        .map(mapTrainingTopic),
+    )
+  } catch (error) {
+    warnContentfulError('journeyPage', error)
+    return emptyJourneyPage
   }
 }
 
@@ -346,29 +520,29 @@ export async function fetchEventBySlug(slug: string): Promise<EventItem | undefi
 }
 
 export async function fetchProgramsPage(): Promise<ProgramsPageContent> {
-  const events = await fetchEvents()
+  const [events, chrome] = await Promise.all([
+    fetchEvents(),
+    isContentfulConfigured()
+      ? getOptionalSingleton<ProgramsPageSkeleton>('programsPage')
+      : Promise.resolve(null),
+  ])
 
+  if (chrome) return mapProgramsPageChrome(chrome, events)
   return { list: { ...emptyProgramsList, events } }
 }
 
 export async function fetchGetInvolvedPage(): Promise<GetInvolvedPageContent> {
   if (!isContentfulConfigured()) return emptyGetInvolvedPage
   try {
-    const client = getContentfulClient()
-    if (!client) return emptyGetInvolvedPage
+    const [entries, page] = await Promise.all([
+      getOptionalEntries<GetInvolvedSkeleton>('getInvolved', {
+        order: ['sys.createdAt'],
+      }),
+      getOptionalSingleton<GetInvolvedPageSkeleton>('getInvolvedPage'),
+    ])
 
-    const res = await client.getEntries<GetInvolvedSkeleton>({
-      content_type: 'getInvolved',
-      order: ['sys.createdAt'],
-      limit: 1000,
-    })
-
-    return res.items.length ? mapGetInvolvedPage(res.items) : emptyGetInvolvedPage
+    return entries.length || page ? mapGetInvolvedPage(entries, page) : emptyGetInvolvedPage
   } catch (error) {
-    if (isUnknownContentTypeError(error)) {
-      warnLocalSection('getInvolved', error)
-      return emptyGetInvolvedPage
-    }
     warnContentfulError('getInvolved', error)
     return emptyGetInvolvedPage
   }
@@ -388,21 +562,15 @@ export async function fetchContactPage(): Promise<ContactPageContent> {
 export async function fetchFaqPage(): Promise<FaqPageContent> {
   if (!isContentfulConfigured()) return emptyFaqPage
   try {
-    const client = getContentfulClient()
-    if (!client) return emptyFaqPage
+    const [entries, page] = await Promise.all([
+      getOptionalEntries<FaqSkeleton>('faq', {
+        order: ['sys.createdAt'],
+      }),
+      getOptionalSingleton<FaqPageSkeleton>('faqPage'),
+    ])
 
-    const res = await client.getEntries<FaqSkeleton>({
-      content_type: 'faq',
-      order: ['sys.createdAt'],
-      limit: 1000,
-    })
-
-    return res.items.length ? mapFaqPage(res.items) : emptyFaqPage
+    return entries.length || page ? mapFaqPage(entries, page) : emptyFaqPage
   } catch (error) {
-    if (isUnknownContentTypeError(error)) {
-      warnLocalSection('faq', error)
-      return emptyFaqPage
-    }
     warnContentfulError('faq', error)
     return emptyFaqPage
   }
