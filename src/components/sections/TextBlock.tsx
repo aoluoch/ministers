@@ -1,4 +1,5 @@
 import { Reveal } from '@/components/layout/Reveal'
+import { CmsImage } from '@/components/ui/cms-image'
 import { cn } from '@/lib/utils'
 import type { TextBlockProps } from '@/types/content'
 
@@ -41,9 +42,12 @@ export function TextBlock({ eyebrow, title, paragraphs, quote, image }: TextBloc
         <div>{copy}</div>
         {image ? (
           <div className="overflow-hidden rounded-2xl bg-brand-purple-deep/10 ring-1 ring-brand-purple/10">
-            <img
+            <CmsImage
               src={image.src}
               alt={image.alt}
+              width={640}
+              height={512}
+              sizes="(min-width: 1024px) 40vw, 100vw"
               className="mx-auto max-h-[32rem] w-full object-contain object-center"
             />
           </div>

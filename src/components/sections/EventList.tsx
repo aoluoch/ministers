@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Calendar, MapPin } from 'lucide-react'
 import { Reveal } from '@/components/layout/Reveal'
 import { CtaButton } from '@/components/sections/CtaButton'
+import { CmsImage } from '@/components/ui/cms-image'
 import { cn } from '@/lib/utils'
 import type { EventItem, EventListProps } from '@/types/content'
 
@@ -20,9 +21,13 @@ function EventCard({ event }: { event: EventItem }) {
       >
         <div className="relative min-h-40 bg-brand-purple sm:min-h-full">
           {event.coverImage ? (
-            <img
+            <CmsImage
               src={event.coverImage.src}
-              alt={event.coverImage.alt}
+              alt={`${event.title}${event.dateLabel ? ` — ${event.dateLabel}` : ''}`}
+              width={224}
+              height={224}
+              fit="fill"
+              sizes="(min-width: 768px) 14rem, (min-width: 640px) 11rem, 100vw"
               className="h-full w-full object-cover opacity-95"
             />
           ) : null}

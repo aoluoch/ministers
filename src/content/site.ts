@@ -1,4 +1,6 @@
-import type { SiteContent } from '@/types/content'
+// Relative import (not the `@/` alias) so build-time SEO tooling in `seo/` can
+// load this file directly from Node — see src/lib/seo/pages.ts.
+import type { SiteContent } from '../types/content.ts'
 
 export const siteContent: SiteContent = {
   name: 'Young Ministers Movement',

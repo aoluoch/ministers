@@ -3,18 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/jpeg" href="/newlogo.jpeg" />
+    <link rel="apple-touch-icon" href="/newlogo.jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Young Ministers Movement — a global movement raising ministers of the gospel who are fully equipped to operate and minister the gospel globally. Belong. Become. Build. Beyond."
-    />
+    <meta name="theme-color" content="#430158" />
+    <meta name="author" content="Young Ministers Movement" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://images.ctfassets.net" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.contentful.com" />
+    <!--
+      Fonts load without blocking first paint: fetch as a stylesheet only after
+      the browser has parsed the document (`media="print"` + onload swap), with a
+      <noscript> fallback. `display=swap` keeps text visible while they load.
+    -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
-    <title>Young Ministers Movement</title>
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <!--
+      Everything between the SEO markers is replaced per route at build time
+      (see seo/plugin.ts). In dev the fallback below is used, and the runtime
+      <Seo> component overwrites it on the client.
+    -->
+    <!--seo-head-start-->
+    <title>Young Ministers Movement — Belong, Become, Build, Beyond</title>
+    <meta
+      name="description"
+      content="A global movement raising up young ministers of the gospel and equipping them to operate confidently on the global stage."
+    />
+    <!--seo-head-end-->
   </head>
   <body>
     <div id="root"></div>

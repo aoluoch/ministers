@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Calendar, Clock, MapPin } from 'lucide-react'
+import { Breadcrumbs } from '@/components/seo/Breadcrumbs'
 import { CtaButton } from '@/components/sections/CtaButton'
+import { CmsImage } from '@/components/ui/cms-image'
 import { cn } from '@/lib/utils'
 import type { EventDetailHeroProps, EventItem } from '@/types/content'
 
@@ -19,6 +21,7 @@ export function EventDetailHero({
   location,
   coverImage,
   registerCta,
+  slug,
 }: EventDetailHeroProps) {
   return (
     <section className="relative overflow-hidden bg-brand-purple text-brand-cream">
@@ -32,9 +35,16 @@ export function EventDetailHero({
       />
       <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-16">
         <div className="animate-fade-up">
+          {slug ? (
+            <Breadcrumbs
+              path={`/programs/${slug}`}
+              currentLabel={title}
+              className="text-brand-beige"
+            />
+          ) : null}
           <Link
             to="/programs"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-beige transition hover:text-brand-cream"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand-beige transition hover:text-brand-cream"
           >
             <ArrowLeft className="h-4 w-4" />
             All events
@@ -84,9 +94,13 @@ export function EventDetailHero({
 
         <div className="animate-fade-in relative mx-auto flex aspect-4/3 w-full max-w-xl items-center justify-center overflow-hidden rounded-lg bg-brand-purple-deep/60 ring-2 ring-brand-peach/40 lg:mx-0 lg:justify-self-end">
           {coverImage ? (
-            <img
+            <CmsImage
               src={coverImage.src}
-              alt={coverImage.alt}
+              alt={`${title}${dateLabel ? ` — ${dateLabel}` : ''}`}
+              width={640}
+              height={480}
+              priority
+              sizes="(min-width: 1024px) 45vw, 100vw"
               className="h-full w-full object-contain"
             />
           ) : (

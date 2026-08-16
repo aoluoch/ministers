@@ -1,4 +1,5 @@
 import { Reveal } from '@/components/layout/Reveal'
+import { CmsImage } from '@/components/ui/cms-image'
 import type { EventGalleryProps } from '@/types/content'
 
 export function EventGallery({
@@ -26,11 +27,13 @@ export function EventGallery({
             {photos.map((photo, index) => (
               <Reveal key={`${photo.src}-${index}`} delayMs={index * 50}>
                 <figure className="overflow-hidden rounded-xl border border-brand-purple/10 bg-card shadow-sm">
-                  <img
+                  <CmsImage
                     src={photo.src}
-                    alt={photo.alt}
+                    alt={photo.caption?.trim() || photo.alt}
+                    width={480}
+                    height={360}
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                     className="aspect-[4/3] w-full bg-brand-purple-deep/5 object-contain"
-                    loading="lazy"
                   />
                   {photo.caption ? (
                     <figcaption className="px-3 py-2 text-xs text-muted-foreground">

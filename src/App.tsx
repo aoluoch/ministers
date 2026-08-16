@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { PageShell } from '@/components/layout/PageShell'
 import {
   fetchAboutPage,
@@ -18,6 +18,7 @@ import { EventDetailPage } from '@/pages/EventDetailPage'
 import { GetInvolvedPage } from '@/pages/GetInvolvedPage'
 import { ContactPage } from '@/pages/ContactPage'
 import { FaqPage } from '@/pages/FaqPage'
+import { NotFoundPage } from '@/pages/NotFoundPage'
 
 function RouteHydrateFallback() {
   return <div className="min-h-screen bg-background" />
@@ -68,7 +69,7 @@ const router = createBrowserRouter([
         element: <FaqPage />,
         loader: () => fetchFaqPage(),
       },
-      { path: '*', element: <Navigate to="/" replace /> },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ])

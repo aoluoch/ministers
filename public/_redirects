@@ -1,0 +1,12 @@
+# SPA fallback for static hosts that read `_redirects` (Netlify, Cloudflare Pages,
+# Render). Resolution order:
+#
+#  1. Real files win first — sitemap.xml, robots.txt, /assets/*, and the
+#     prerendered per-route index.html files (/about → /about/index.html).
+#  2. /programs/* falls back to the SPA shell with HTTP 200 so an event published
+#     in Contentful after the last build still renders (the router + Contentful
+#     loader fetch it live); unknown slugs render the in-app 404 view.
+#  3. Everything else is genuinely missing, so 404.html is served with a real
+#     HTTP 404 rather than a soft 404.
+/programs/*  /index.html  200
+/*           /404.html    404

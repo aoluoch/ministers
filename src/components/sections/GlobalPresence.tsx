@@ -1,4 +1,5 @@
 import { Reveal } from '@/components/layout/Reveal'
+import { CmsImage } from '@/components/ui/cms-image'
 import type { GlobalPresenceProps } from '@/types/content'
 
 export function GlobalPresence({ title, intro, nations, images, chapters }: GlobalPresenceProps) {
@@ -27,7 +28,13 @@ export function GlobalPresence({ title, intro, nations, images, chapters }: Glob
             <ul className="flex flex-wrap items-center gap-4">
               {images.map((image) => (
                 <li key={image.src} className="overflow-hidden rounded-lg bg-black/30 ring-1 ring-white/10">
-                  <img src={image.src} alt={image.alt} className="h-24 w-24 object-contain sm:h-28 sm:w-28" />
+                  <CmsImage
+                    src={image.src}
+                    alt={image.alt}
+                    width={112}
+                    height={112}
+                    className="h-24 w-24 object-contain sm:h-28 sm:w-28"
+                  />
                 </li>
               ))}
             </ul>
@@ -55,9 +62,17 @@ export function GlobalPresence({ title, intro, nations, images, chapters }: Glob
               <Reveal key={`${chapter.country}-${chapter.leaderName}`} delayMs={index * 40}>
                 <li className="rounded-xl border border-white/10 bg-white/5 p-5">
                   {chapter.photo ? (
-                    <img
+                    <CmsImage
                       src={chapter.photo.src}
-                      alt={chapter.photo.alt}
+                      alt={
+                        chapter.leaderName
+                          ? `${chapter.leaderName}${chapter.leaderTitle ? `, ${chapter.leaderTitle}` : ''} — ${chapter.country} chapter`
+                          : chapter.photo.alt
+                      }
+                      width={384}
+                      height={160}
+                      fit="fill"
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                       className="mb-4 h-40 w-full rounded-lg object-cover object-top ring-1 ring-brand-peach/30"
                     />
                   ) : null}

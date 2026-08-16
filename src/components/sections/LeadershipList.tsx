@@ -1,4 +1,5 @@
 import { Reveal } from '@/components/layout/Reveal'
+import { CmsImage } from '@/components/ui/cms-image'
 import type { LeadershipListProps } from '@/types/content'
 
 export function LeadershipList({ title, leaders }: LeadershipListProps) {
@@ -18,9 +19,12 @@ export function LeadershipList({ title, leaders }: LeadershipListProps) {
               <Reveal key={`${leader.role}-${leader.name}`} delayMs={index * 40}>
                 <li className="rounded-lg border border-brand-purple/10 bg-card/70 p-5 shadow-sm">
                   {leader.photo ? (
-                    <img
+                    <CmsImage
                       src={leader.photo.src}
-                      alt={leader.photo.alt}
+                      alt={`${leader.name}${leader.role ? `, ${leader.role}` : ''}`}
+                      width={64}
+                      height={64}
+                      fit="thumb"
                       className="mb-4 h-16 w-16 rounded-full object-cover ring-2 ring-brand-peach/40"
                     />
                   ) : null}

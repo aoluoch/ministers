@@ -13,6 +13,10 @@ export function SiteFooter() {
               <img
                 src={siteContent.logoSrc}
                 alt=""
+                width={48}
+                height={48}
+                loading="lazy"
+                decoding="async"
                 className="h-12 w-12 rounded-lg object-cover ring-1 ring-brand-peach/35"
               />
               <p className="font-display text-lg font-bold">{siteContent.name}</p>

@@ -1,5 +1,6 @@
 import type { Asset, Entry } from 'contentful'
 import { siteContent } from '@/content/site'
+import { slugify } from '@/lib/slug'
 import type {
   AboutPageContent,
   BeliefsListProps,
@@ -484,13 +485,8 @@ function asEventStatusFromDate(
   return eventDay < todayDay ? 'past' : fallbackStatus
 }
 
-function asSlug(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/['’]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
+/** Shared with the build-time sitemap generator so URLs always match. */
+const asSlug = slugify
 
 function asDateLabel(value: unknown): string {
   if (typeof value !== 'string' || !value.trim()) return ''
@@ -503,6 +499,13 @@ function asDateLabel(value: unknown): string {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(date)
+}
+
+/** Raw ISO timestamp for `Event` structured data (`startDate`). */
+function asIsoDate(value: unknown): string | undefined {
+  if (typeof value !== 'string' || !value.trim()) return undefined
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
 }
 
 export function mapEvent(
@@ -565,6 +568,7 @@ export function mapProgram(
     status: asEventStatusFromDate(f.date, f.status),
     summary: asString(f.summary),
     dateLabel: asDateLabel(f.date),
+    dateIso: asIsoDate(f.date),
     location: asString(f.location),
     coverImage: (() => {
       const src = assetUrl(cover)

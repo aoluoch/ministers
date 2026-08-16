@@ -115,6 +115,8 @@ export type EventItem = {
   status: 'upcoming' | 'ongoing' | 'past'
   summary: string
   dateLabel: string
+  /** Raw ISO date from the CMS — used for `Event` structured data. */
+  dateIso?: string
   timeLabel?: string
   location: string
   coverImage?: EventCoverImage
@@ -135,6 +137,8 @@ export type EventListProps = {
 
 export type EventDetailHeroProps = {
   title: string
+  /** Event slug, used for the breadcrumb trail on the detail page. */
+  slug?: string
   cadence: string
   status: EventItem['status']
   dateLabel: string

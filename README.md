@@ -19,10 +19,13 @@ Open the local URL Vite prints (usually `http://localhost:5173`).
 Add Contentful Content Delivery API credentials to `.env` for page content:
 
 ```env
+VITE_SITE_URL=https://youngministers.org
 VITE_CONTENTFUL_SPACE_ID=your_space_id
 VITE_CONTENTFUL_ACCESS_TOKEN=your_cda_token
 VITE_CONTENTFUL_ENVIRONMENT=master
 ```
+
+`VITE_SITE_URL` is the canonical production origin used for canonical tags, Open Graph/Twitter URLs, `sitemap.xml`, and `robots.txt`. It defaults to `https://youngministers.org` when unset — set it in your host's environment variables if the domain changes.
 
 Fetchers and field adapters live in [`src/lib/contentful/`](src/lib/contentful/). If the Contentful env vars are missing, the app returns empty page sections instead of using local copy.
 
@@ -47,6 +50,36 @@ Fetchers and field adapters live in [`src/lib/contentful/`](src/lib/contentful/)
 | `/get-involved` | Ways to get involved |
 | `/contact` | Contact & socials |
 | `/faq` | FAQ |
+| `*` | 404 (`noindex`, excluded from the sitemap) |
+
+## SEO
+
+`npm run build` generates production SEO artefacts into `dist/` via [`seo/plugin.ts`](seo/plugin.ts):
+
+| Output | Notes |
+|--------|-------|
+| `dist/sitemap.xml` | All public pages + one URL per **published** Contentful program. Generated automatically — never hardcoded. |
+| `dist/robots.txt` | Allows public crawling, blocks private paths and tracking-parameter duplicates, references the sitemap. |
+| `dist/<route>/index.html` | A copy of the shell per public route with that route's real `<title>`, description, canonical, OG/Twitter tags and JSON-LD injected, so crawlers that do not run JS still read correct metadata. |
+| `dist/404.html` | `noindex, follow`, no canonical, never in the sitemap. |
+
+At runtime [`<Seo>`](src/components/seo/Seo.tsx) keeps the same tags in sync during client-side navigation. Shared, isomorphic definitions live in [`src/lib/seo/`](src/lib/seo/):
+
+- `pages.ts` — public page list, canonical URL helpers, Contentful image helpers
+- `schema.ts` — `WebSite`, `Organization`, `BreadcrumbList`, `Event`, `ItemList`, `FAQPage`, `Service`
+- `routes.ts` — route → metadata + JSON-LD graph
+
+To add a public page: add it to `STATIC_PAGES` in `src/lib/seo/pages.ts`, add the route in `src/App.tsx`, and render `<Seo {...staticPageSeo('/new-path', SITE_URL)} />` in the page. Event pages are picked up automatically from Contentful.
+
+Verify locally (both are served by dev **and** preview):
+
+```bash
+npm run build && npm run preview
+curl -i http://localhost:4173/sitemap.xml
+curl -i http://localhost:4173/robots.txt
+```
+
+Hosting: [`netlify.toml`](netlify.toml), [`vercel.json`](vercel.json), and [`public/_redirects`](public/_redirects) serve real files first, fall back to the SPA shell for `/programs/*` (so events published after the last build still render), and return a real HTTP 404 for anything else.
 
 ### Example event routes
 

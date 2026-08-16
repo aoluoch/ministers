@@ -1,5 +1,6 @@
 import { siteContent } from '@/content/site'
 import { CtaButton } from '@/components/sections/CtaButton'
+import { CmsImage } from '@/components/ui/cms-image'
 import { cn } from '@/lib/utils'
 import type { HeroSectionProps } from '@/types/content'
 
@@ -36,6 +37,11 @@ export function HeroSection({
             <img
               src={siteContent.logoSrc}
               alt={siteContent.logoAlt}
+              width={144}
+              height={144}
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
               className="h-28 w-28 rounded-2xl object-cover ring-2 ring-brand-peach/40 sm:h-36 sm:w-36"
             />
           </div>
@@ -74,9 +80,13 @@ export function HeroSection({
 
         {image ? (
           <div className="animate-fade-in hidden justify-center lg:flex">
-            <img
+            <CmsImage
               src={image.src}
               alt={image.alt}
+              width={560}
+              height={448}
+              priority
+              sizes="(min-width: 1024px) 40vw, 100vw"
               className="max-h-[28rem] w-full rounded-2xl object-contain"
             />
           </div>
