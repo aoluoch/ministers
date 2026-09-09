@@ -5,9 +5,11 @@
 import {
   STATIC_PAGES,
   absoluteUrl,
+  blogPath,
   eventPath,
   normalizeSiteUrl,
   type ChangeFrequency,
+  type SeoBlogPost,
   type SeoEvent,
 } from '../src/lib/seo/pages.ts'
 
@@ -42,6 +44,7 @@ function toIsoDay(value: string | undefined, fallback: string): string {
 export function buildSitemapEntries(
   siteUrl: string,
   events: SeoEvent[],
+  posts: SeoBlogPost[] = [],
   now = new Date(),
 ): SitemapEntry[] {
   const origin = normalizeSiteUrl(siteUrl)
@@ -61,8 +64,15 @@ export function buildSitemapEntries(
     priority: 0.7,
   }))
 
+  const postEntries: SitemapEntry[] = posts.map((post) => ({
+    loc: absoluteUrl(origin, blogPath(post.slug)),
+    lastmod: toIsoDay(post.updatedAt, today),
+    changefreq: 'monthly' as ChangeFrequency,
+    priority: 0.7,
+  }))
+
   const seen = new Set<string>()
-  return [...staticEntries, ...eventEntries].filter((entry) => {
+  return [...staticEntries, ...eventEntries, ...postEntries].filter((entry) => {
     if (seen.has(entry.loc)) return false
     seen.add(entry.loc)
     return true

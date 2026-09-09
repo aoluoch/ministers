@@ -153,6 +153,44 @@ export type EventDetailBodyProps = {
   summary: string
   body: string[]
   highlights?: string[]
+  highlightsTitle?: string
+  emptyHeading?: string
+}
+
+export type BlogPost = {
+  slug: string
+  title: string
+  detailTitle?: string
+  tag: string
+  author: string
+  summary: string
+  dateLabel: string
+  dateIso?: string
+  coverImage?: EventCoverImage
+  body: string[]
+  highlights?: string[]
+  photos: EventPhoto[]
+}
+
+export type BlogListProps = {
+  title: string
+  intro: string
+  posts: BlogPost[]
+  footerNote?: string
+  footerCta?: CtaLink
+}
+
+export type BlogDetailHeroProps = {
+  title: string
+  slug?: string
+  tag: string
+  dateLabel: string
+  author: string
+  coverImage?: EventCoverImage
+}
+
+export type BlogPageContent = {
+  list: BlogListProps
 }
 
 export type EventGalleryProps = {

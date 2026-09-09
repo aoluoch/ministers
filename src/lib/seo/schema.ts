@@ -12,6 +12,7 @@ import {
   type BreadcrumbItem,
   type PageSeo,
   type SeoEvent,
+  type SeoBlogPost,
 } from './pages.ts'
 
 type JsonLdObject = Record<string, unknown>
@@ -194,6 +195,56 @@ export function eventListSchema(
       url: absoluteUrl(siteUrl, `/programs/${event.slug}`),
     })),
   }
+}
+
+/** ItemList of article links for the `/blog` list page. */
+export function blogListSchema(
+  siteUrl: string,
+  posts: Array<{ slug: string; title: string }>,
+): JsonLdObject | null {
+  if (!posts.length) return null
+  const url = absoluteUrl(siteUrl, '/blog')
+  return {
+    '@type': 'ItemList',
+    '@id': `${url}#blog`,
+    name: 'Blog',
+    numberOfItems: posts.length,
+    itemListElement: posts.map((post, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: post.title,
+      url: absoluteUrl(siteUrl, `/blog/${post.slug}`),
+    })),
+  }
+}
+
+/** BlogPosting schema for an article detail page. */
+export function articleSchema(
+  siteUrl: string,
+  post: SeoBlogPost,
+  options: { description?: string } = {},
+): JsonLdObject {
+  const url = absoluteUrl(siteUrl, `/blog/${post.slug}`)
+  const schema: JsonLdObject = {
+    '@type': 'BlogPosting',
+    '@id': `${url}#article`,
+    headline: post.title,
+    url,
+    mainEntityOfPage: url,
+    publisher: { '@id': organizationId(siteUrl) },
+    isPartOf: { '@id': websiteId(siteUrl) },
+  }
+
+  const description = (options.description ?? post.summary ?? '').trim()
+  if (description) schema.description = description
+  if (post.dateIso) schema.datePublished = post.dateIso
+  if (post.author) {
+    schema.author = { '@type': 'Person', name: post.author }
+  } else {
+    schema.author = { '@id': organizationId(siteUrl) }
+  }
+  if (post.imageUrl) schema.image = post.imageUrl
+  return schema
 }
 
 /** FAQPage — only when real question/answer pairs exist in Contentful. */

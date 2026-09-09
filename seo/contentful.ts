@@ -6,7 +6,7 @@
  * SDK. Credentials come from the same `VITE_CONTENTFUL_*` env vars the app uses.
  */
 import { slugify } from '../src/lib/slug.ts'
-import type { SeoEvent } from '../src/lib/seo/pages.ts'
+import type { SeoBlogPost, SeoEvent } from '../src/lib/seo/pages.ts'
 
 type ContentfulAssetFile = {
   url?: string
@@ -28,6 +28,8 @@ type ProgramEntry = {
     date?: string
     location?: string
     status?: string
+    kind?: string
+    author?: string
     media?: ContentfulLink[]
   }
 }
@@ -135,6 +137,24 @@ function isoDate(value: string | undefined): string | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
 }
 
+function isArticle(item: ProgramEntry): boolean {
+  return item.fields?.kind?.trim().toLowerCase() === 'article'
+}
+
+function coverFrom(
+  item: ProgramEntry,
+  assets: Map<string, ContentfulAsset>,
+  title: string,
+): { imageUrl?: string; imageAlt: string } {
+  const cover = item.fields?.media?.[0]?.sys.id
+    ? assets.get(item.fields.media[0].sys.id)
+    : undefined
+  const rawUrl = cover?.fields?.file?.url
+  const imageUrl = rawUrl?.startsWith('//') ? `https:${rawUrl}` : rawUrl
+  const imageAlt = cover?.fields?.description?.trim() || title
+  return { imageUrl, imageAlt }
+}
+
 /**
  * Published programs → sitemap/prerender input. Returns `[]` (never throws) so a
  * missing token or CDA outage degrades to a static-pages-only sitemap instead of
@@ -152,20 +172,14 @@ export async function fetchSeoEvents(env: ContentfulEnv): Promise<SeoEvent[]> {
 
   const events: SeoEvent[] = []
   for (const item of data.items ?? []) {
+    if (isArticle(item)) continue
     const title = item.fields?.title?.trim()
     if (!title) continue
 
     const slug = slugify(title) || slugify(item.sys.id)
     if (!slug) continue
 
-    const cover = item.fields?.media?.[0]?.sys.id
-      ? assets.get(item.fields.media[0].sys.id)
-      : undefined
-    const rawUrl = cover?.fields?.file?.url
-    const imageUrl = rawUrl?.startsWith('//') ? `https:${rawUrl}` : rawUrl
-    // Prefer the editor-written asset description; fall back to the event title
-    // rather than the uploaded file name.
-    const imageAlt = cover?.fields?.description?.trim() || title
+    const cover = coverFrom(item, assets, title)
 
     events.push({
       slug,
@@ -174,8 +188,8 @@ export async function fetchSeoEvents(env: ContentfulEnv): Promise<SeoEvent[]> {
       dateIso: isoDate(item.fields?.date),
       dateLabel: dateLabel(item.fields?.date),
       location: item.fields?.location?.trim() || undefined,
-      imageUrl,
-      imageAlt,
+      imageUrl: cover.imageUrl,
+      imageAlt: cover.imageAlt,
       updatedAt: item.sys.updatedAt,
     })
   }
@@ -185,6 +199,52 @@ export async function fetchSeoEvents(env: ContentfulEnv): Promise<SeoEvent[]> {
   return events.filter((event) => {
     if (seen.has(event.slug)) return false
     seen.add(event.slug)
+    return true
+  })
+}
+
+/**
+ * Published `kind=article` programs → sitemap/prerender input for `/blog`.
+ * Returns `[]` (never throws) so a missing token or CDA outage degrades safely.
+ */
+export async function fetchSeoBlogPosts(env: ContentfulEnv): Promise<SeoBlogPost[]> {
+  const url = cdaUrl(env, 'programs', { include: '1', order: '-fields.date' })
+  if (!url) return []
+
+  const data = await fetchJson<EntriesResponse>(url, 'blog')
+  if (!data) return []
+
+  const assets = new Map<string, ContentfulAsset>()
+  for (const asset of data.includes?.Asset ?? []) assets.set(asset.sys.id, asset)
+
+  const posts: SeoBlogPost[] = []
+  for (const item of data.items ?? []) {
+    if (!isArticle(item)) continue
+    const title = item.fields?.title?.trim()
+    if (!title) continue
+
+    const slug = slugify(title) || slugify(item.sys.id)
+    if (!slug) continue
+
+    const cover = coverFrom(item, assets, title)
+
+    posts.push({
+      slug,
+      title,
+      summary: item.fields?.summary?.trim() || undefined,
+      dateIso: isoDate(item.fields?.date),
+      dateLabel: dateLabel(item.fields?.date),
+      author: item.fields?.author?.trim() || undefined,
+      imageUrl: cover.imageUrl,
+      imageAlt: cover.imageAlt,
+      updatedAt: item.sys.updatedAt,
+    })
+  }
+
+  const seen = new Set<string>()
+  return posts.filter((post) => {
+    if (seen.has(post.slug)) return false
+    seen.add(post.slug)
     return true
   })
 }

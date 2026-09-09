@@ -14,6 +14,7 @@ export const siteContent: SiteContent = {
     { label: 'About', href: '/about' },
     { label: 'Journey', href: '/journey' },
     { label: 'Programs', href: '/programs' },
+    { label: 'Blog', href: '/blog' },
     { label: 'Get Involved', href: '/get-involved' },
     { label: 'Contact', href: '/contact' },
     { label: 'FAQ', href: '/faq' },

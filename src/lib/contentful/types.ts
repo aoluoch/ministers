@@ -211,6 +211,9 @@ export type ProgramsSkeleton = EntrySkeletonType & {
     description: EntryFieldTypes.RichText
     eventDetails?: EntryFieldTypes.RichText
     media?: EntryFieldTypes.Array<EntryFieldTypes.AssetLink>
+    /** `event` (default) or `article` — articles render on `/blog`. */
+    kind?: EntryFieldTypes.Symbol
+    author?: EntryFieldTypes.Symbol
   }
 }
 

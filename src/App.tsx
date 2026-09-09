@@ -2,6 +2,8 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { PageShell } from '@/components/layout/PageShell'
 import {
   fetchAboutPage,
+  fetchBlogPage,
+  fetchBlogPostBySlug,
   fetchContactPage,
   fetchEventBySlug,
   fetchFaqPage,
@@ -15,6 +17,8 @@ import { AboutPage } from '@/pages/AboutPage'
 import { JourneyPage } from '@/pages/JourneyPage'
 import { ProgramsPage } from '@/pages/ProgramsPage'
 import { EventDetailPage } from '@/pages/EventDetailPage'
+import { BlogPage } from '@/pages/BlogPage'
+import { BlogDetailPage } from '@/pages/BlogDetailPage'
 import { GetInvolvedPage } from '@/pages/GetInvolvedPage'
 import { ContactPage } from '@/pages/ContactPage'
 import { FaqPage } from '@/pages/FaqPage'
@@ -53,6 +57,16 @@ const router = createBrowserRouter([
         path: 'programs/:slug',
         element: <EventDetailPage />,
         loader: ({ params }) => fetchEventBySlug(params.slug ?? ''),
+      },
+      {
+        path: 'blog',
+        element: <BlogPage />,
+        loader: () => fetchBlogPage(),
+      },
+      {
+        path: 'blog/:slug',
+        element: <BlogDetailPage />,
+        loader: ({ params }) => fetchBlogPostBySlug(params.slug ?? ''),
       },
       {
         path: 'get-involved',

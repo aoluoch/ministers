@@ -73,6 +73,9 @@ export const SITE = {
 /** Programs list page — parent of every event detail page. */
 export const PROGRAMS_PATH = '/programs'
 
+/** Blog list page — parent of every article detail page. */
+export const BLOG_PATH = '/blog'
+
 /** Public, indexable pages. Single source of truth for sitemap + prerender. */
 export const STATIC_PAGES: StaticPageSeo[] = [
   {
@@ -110,6 +113,15 @@ export const STATIC_PAGES: StaticPageSeo[] = [
       'The Young Ministers Summit introduced the movement. Programs are the public gatherings where young ministers train, connect, and are sent.',
     changeFrequency: 'weekly',
     priority: 0.9,
+  },
+  {
+    path: BLOG_PATH,
+    label: 'Blog',
+    title: 'Blog',
+    description:
+      'Stories, teaching, and updates from the Young Ministers Movement — belonging, becoming, building, and going beyond.',
+    changeFrequency: 'weekly',
+    priority: 0.8,
   },
   {
     path: '/get-involved',
@@ -275,6 +287,15 @@ export function breadcrumbTrail(path: string, currentLabel?: string): Breadcrumb
     ]
   }
 
+  if (normalized.startsWith(`${BLOG_PATH}/`)) {
+    const blog = findStaticPage(BLOG_PATH)
+    return [
+      home,
+      { name: blog?.label ?? 'Blog', path: BLOG_PATH },
+      { name: currentLabel ?? 'Article', path: normalized },
+    ]
+  }
+
   return [home, { name: currentLabel ?? 'Page', path: normalized }]
 }
 
@@ -297,6 +318,10 @@ export function eventPath(slug: string): string {
   return `${PROGRAMS_PATH}/${slug}`
 }
 
+export function blogPath(slug: string): string {
+  return `${BLOG_PATH}/${slug}`
+}
+
 /** Title/description for an event detail page, built from real CMS content. */
 export function eventPageSeo(event: SeoEvent, siteUrl: string): PageSeo {
   const description = clampDescription(
@@ -313,6 +338,41 @@ export function eventPageSeo(event: SeoEvent, siteUrl: string): PageSeo {
   return {
     path: eventPath(event.slug),
     title: event.title,
+    description,
+    image,
+    twitterCard,
+  }
+}
+
+/** Minimal article shape shared by the app and the build-time generator. */
+export type SeoBlogPost = {
+  slug: string
+  title: string
+  summary?: string
+  dateIso?: string
+  dateLabel?: string
+  author?: string
+  imageUrl?: string
+  imageAlt?: string
+  updatedAt?: string
+}
+
+/** Title/description for a blog article page, built from real CMS content. */
+export function blogPostPageSeo(post: SeoBlogPost, siteUrl: string): PageSeo {
+  const description = clampDescription(
+    post.summary?.trim() ||
+      [post.title, post.dateLabel, post.author].filter(Boolean).join(' · ') ||
+      SITE.tagline,
+  )
+  const { image, twitterCard } = socialImageFrom(
+    post.imageUrl,
+    post.imageAlt || post.title,
+    defaultOgImage(siteUrl),
+  )
+
+  return {
+    path: blogPath(post.slug),
+    title: post.title,
     description,
     image,
     twitterCard,

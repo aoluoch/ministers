@@ -1,6 +1,8 @@
 import { siteContent } from '@/content/site'
 import type {
   AboutPageContent,
+  BlogPageContent,
+  BlogPost,
   ContactPageContent,
   EventItem,
   FaqPageContent,
@@ -21,6 +23,8 @@ import {
   mapCommunityGroup,
   mapContactPage,
   mapFaqPage,
+  isProgramArticle,
+  mapBlogPost,
   mapGetInvolvedPage,
   mapGlobalPresence,
   mapHeroSection,
@@ -161,6 +165,18 @@ const emptyProgramsList: ProgramsPageContent['list'] = {
   events: [],
 }
 
+const defaultBlogList: BlogPageContent['list'] = {
+  title: 'Blog',
+  intro: 'Stories, teaching, and updates from the Young Ministers Movement.',
+  posts: [],
+  footerNote:
+    'Programs are the public gatherings. The blog is where we write about the journey around Belong, Become, Build, and Beyond.',
+  footerCta: {
+    label: 'Join the Movement',
+    href: '/get-involved',
+  },
+}
+
 const emptyGetInvolvedPage: GetInvolvedPageContent = {
   pathways: {
     title: '',
@@ -257,7 +273,16 @@ function warnContentfulError(label: string, error: unknown) {
 
 function isUnknownContentTypeError(error: unknown): boolean {
   const errors = (error as ContentfulError).details?.errors
-  return Array.isArray(errors) && errors.some((item) => item.name === 'unknownContentType')
+  if (Array.isArray(errors) && errors.some((item) => item.name === 'unknownContentType')) {
+    return true
+  }
+  const message = error instanceof Error ? error.message : ''
+  if (message.includes('unknownContentType')) return true
+  try {
+    return JSON.stringify(error).includes('unknownContentType')
+  } catch {
+    return false
+  }
 }
 
 function warnLocalSection(label: string, error: unknown) {
@@ -494,8 +519,9 @@ export async function fetchEvents(): Promise<EventItem[]> {
     const res = await client.getEntries<ProgramsSkeleton>({
       content_type: 'programs',
       order: ['fields.date'],
+      include: 2,
     })
-    return res.items.map(mapProgram)
+    return res.items.filter((item) => !isProgramArticle(item)).map(mapProgram)
   } catch (error) {
     if (isUnknownContentTypeError(error)) {
       warnLocalSection('programs', error)
@@ -529,6 +555,49 @@ export async function fetchProgramsPage(): Promise<ProgramsPageContent> {
 
   if (chrome) return mapProgramsPageChrome(chrome, events)
   return { list: { ...emptyProgramsList, events } }
+}
+
+export async function fetchBlogPosts(): Promise<BlogPost[]> {
+  if (!isContentfulConfigured()) return []
+  try {
+    const client = getContentfulClient()
+    if (!client) return []
+
+    const res = await client.getEntries<ProgramsSkeleton>({
+      content_type: 'programs',
+      order: ['-fields.date'],
+      include: 2,
+    })
+    return res.items.filter(isProgramArticle).map(mapBlogPost)
+  } catch (error) {
+    if (isUnknownContentTypeError(error)) {
+      warnLocalSection('blog', error)
+      return []
+    }
+    warnContentfulError('blog', error)
+    return []
+  }
+}
+
+export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
+  if (!isContentfulConfigured()) return undefined
+  try {
+    const posts = await fetchBlogPosts()
+    return posts.find((post) => post.slug === slug)
+  } catch (error) {
+    warnContentfulError(`blog:${slug}`, error)
+    return undefined
+  }
+}
+
+export async function fetchBlogPage(): Promise<BlogPageContent> {
+  try {
+    const posts = await fetchBlogPosts()
+    return { list: { ...defaultBlogList, posts } }
+  } catch (error) {
+    warnContentfulError('blogPage', error)
+    return { list: defaultBlogList }
+  }
 }
 
 export async function fetchGetInvolvedPage(): Promise<GetInvolvedPageContent> {

@@ -1,6 +1,8 @@
 export { getContentfulClient, isContentfulConfigured } from './client'
 export {
   fetchAboutPage,
+  fetchBlogPage,
+  fetchBlogPostBySlug,
   fetchContactPage,
   fetchEventBySlug,
   fetchEvents,

@@ -24,6 +24,7 @@ import type {
   LeadershipListProps,
   MissionBlockProps,
   ProgramsPageContent,
+  BlogPost,
   TestimonialsProps,
   TextBlockProps,
   TrackRecordProps,
@@ -458,6 +459,12 @@ export function mapProgramsPageChrome(
   }
 }
 
+export function isProgramArticle(
+  entry: Entry<ProgramsSkeleton, undefined, string>,
+): boolean {
+  return asOptionalString(fieldsOf(entry).kind)?.toLowerCase() === 'article'
+}
+
 function asEventStatus(value: unknown): EventItem['status'] {
   const status = typeof value === 'string' ? value.trim().toLowerCase() : ''
   if (status === 'upcoming' || status === 'ongoing' || status === 'past') return status
@@ -591,6 +598,27 @@ export function mapProgram(
         }
       })
       .filter((p): p is NonNullable<typeof p> => p !== null),
+  }
+}
+
+export function mapBlogPost(
+  entry: Entry<ProgramsSkeleton, undefined, string>,
+): BlogPost {
+  const mapped = mapProgram(entry)
+  const f = fieldsOf(entry)
+  return {
+    slug: mapped.slug,
+    title: mapped.title,
+    detailTitle: mapped.detailTitle,
+    tag: asString(f.tag),
+    author: asString(f.author),
+    summary: mapped.summary,
+    dateLabel: mapped.dateLabel,
+    dateIso: mapped.dateIso,
+    coverImage: mapped.coverImage,
+    body: mapped.body,
+    highlights: mapped.highlights,
+    photos: mapped.photos,
   }
 }
 

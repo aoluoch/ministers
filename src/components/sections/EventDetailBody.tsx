@@ -6,8 +6,10 @@ export function EventDetailBody({
   summary,
   body,
   highlights,
+  highlightsTitle = 'Event details',
+  emptyHeading = 'About this event',
 }: EventDetailBodyProps) {
-  const heading = title ?? (summary || body.length || highlights?.length ? 'About this event' : '')
+  const heading = title ?? (summary || body.length || highlights?.length ? emptyHeading : '')
 
   if (!heading && !summary && !body.length && !highlights?.length) return null
 
@@ -37,7 +39,7 @@ export function EventDetailBody({
         {highlights?.length ? (
           <Reveal delayMs={80}>
             <aside className="rounded-xl border border-brand-purple/10 bg-card/80 p-6 shadow-sm">
-              <h3 className="font-display text-lg font-bold text-brand-purple">Event details</h3>
+              <h3 className="font-display text-lg font-bold text-brand-purple">{highlightsTitle}</h3>
               <ul className="mt-4 space-y-3">
                 {highlights.map((item) => (
                   <li key={item} className="flex gap-2.5 text-sm leading-relaxed text-brand-ink/80">

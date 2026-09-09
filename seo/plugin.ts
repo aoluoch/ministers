@@ -2,7 +2,7 @@
  * Vite plugin: production SEO artefacts for this SPA.
  *
  * Build (`vite build`):
- *  1. `dist/sitemap.xml` — static pages + one URL per published Contentful program
+ *  1. `dist/sitemap.xml` — static pages + one URL per published Contentful program/article
  *  2. `dist/robots.txt`  — allows public crawling, blocks private paths, links the sitemap
  *  3. `dist/<route>/index.html` — a copy of `index.html` per public route with that
  *     route's real `<title>`, description, canonical, OG/Twitter tags and JSON-LD
@@ -21,18 +21,22 @@ import type { Connect, Plugin, ResolvedConfig } from 'vite'
 import { loadEnv } from 'vite'
 import {
   STATIC_PAGES,
+  blogPath,
   eventPath,
   normalizeSiteUrl,
   type PageSeo,
+  type SeoBlogPost,
   type SeoEvent,
 } from '../src/lib/seo/pages.ts'
 import {
+  blogPageSeo,
+  blogPostSeo,
   eventDetailSeo,
   notFoundSeo,
   programsPageSeo,
   staticPageSeo,
 } from '../src/lib/seo/routes.ts'
-import { fetchSeoEvents, fetchTitleDescriptionEntries } from './contentful.ts'
+import { fetchSeoBlogPosts, fetchSeoEvents, fetchTitleDescriptionEntries } from './contentful.ts'
 import { renderHeadTags } from './head.ts'
 import { buildSitemapEntries, renderRobots, renderSitemap } from './sitemap.ts'
 import { faqSchema, serviceListSchema } from '../src/lib/seo/schema.ts'
@@ -54,6 +58,7 @@ function injectHead(html: string, headTags: string): string {
 type Artefacts = {
   siteUrl: string
   events: SeoEvent[]
+  posts: SeoBlogPost[]
   faqs: Array<{ title: string; description: string }>
   pathways: Array<{ title: string; description: string }>
   sitemap: string
@@ -69,8 +74,9 @@ async function collect(config: ResolvedConfig): Promise<Artefacts> {
     environment: env.VITE_CONTENTFUL_ENVIRONMENT,
   }
 
-  const [events, faqs, pathways] = await Promise.all([
+  const [events, posts, faqs, pathways] = await Promise.all([
     fetchSeoEvents(contentfulEnv),
+    fetchSeoBlogPosts(contentfulEnv),
     fetchTitleDescriptionEntries(contentfulEnv, 'faq'),
     fetchTitleDescriptionEntries(contentfulEnv, 'getInvolved'),
   ])
@@ -78,16 +84,17 @@ async function collect(config: ResolvedConfig): Promise<Artefacts> {
   return {
     siteUrl,
     events,
+    posts,
     faqs,
     pathways,
-    sitemap: renderSitemap(buildSitemapEntries(siteUrl, events)),
+    sitemap: renderSitemap(buildSitemapEntries(siteUrl, events, posts)),
     robots: renderRobots(siteUrl),
   }
 }
 
 /** Every route that gets its own prerendered HTML file. */
 function routePages(built: Artefacts): Array<{ file: string; page: PageSeo }> {
-  const { siteUrl, events, faqs, pathways } = built
+  const { siteUrl, events, posts, faqs, pathways } = built
 
   const faqSchemaNode = faqSchema(
     siteUrl,
@@ -111,13 +118,22 @@ function routePages(built: Artefacts): Array<{ file: string; page: PageSeo }> {
     page:
       page.path === '/programs'
         ? programsPageSeo(siteUrl, events)
-        : staticPageSeo(page.path, siteUrl, extraFor(page.path)),
+        : page.path === '/blog'
+          ? blogPageSeo(siteUrl, posts)
+          : staticPageSeo(page.path, siteUrl, extraFor(page.path)),
   }))
 
   for (const event of events) {
     pages.push({
       file: `${eventPath(event.slug).replace(/^\//, '')}/index.html`,
       page: eventDetailSeo(siteUrl, event),
+    })
+  }
+
+  for (const post of posts) {
+    pages.push({
+      file: `${blogPath(post.slug).replace(/^\//, '')}/index.html`,
+      page: blogPostSeo(siteUrl, post),
     })
   }
 
@@ -227,9 +243,9 @@ export function seoPlugin(): Plugin {
         written += 1
       }
 
-      const urlCount = buildSitemapEntries(built.siteUrl, built.events).length
+      const urlCount = buildSitemapEntries(built.siteUrl, built.events, built.posts).length
       console.log(
-        `[seo] ${built.siteUrl} → sitemap.xml (${urlCount} URLs, ${built.events.length} dynamic), robots.txt, ${written + 1} pages with prerendered head`,
+        `[seo] ${built.siteUrl} → sitemap.xml (${urlCount} URLs, ${built.events.length + built.posts.length} dynamic), robots.txt, ${written + 1} pages with prerendered head`,
       )
     },
   }

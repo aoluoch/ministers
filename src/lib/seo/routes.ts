@@ -12,16 +12,20 @@ import {
   clampDescription,
   defaultOgImage,
   eventPageSeo,
+  blogPostPageSeo,
   findStaticPage,
   normalizePath,
   socialImageFrom,
   type PageSeo,
   type SeoEvent,
+  type SeoBlogPost,
 } from './pages.ts'
 import {
   breadcrumbSchema,
   eventListSchema,
   eventSchema,
+  blogListSchema,
+  articleSchema,
   webPageSchema,
 } from './schema.ts'
 
@@ -31,6 +35,7 @@ const PAGE_SCHEMA_TYPE: Record<string, string> = {
   '/about': 'AboutPage',
   '/journey': 'WebPage',
   '/programs': 'CollectionPage',
+  '/blog': 'CollectionPage',
   '/get-involved': 'WebPage',
   '/contact': 'ContactPage',
   '/faq': 'WebPage',
@@ -89,6 +94,29 @@ export function eventDetailSeo(
         status: options.status,
         registerUrl: options.registerUrl,
       }),
+    ].filter(Boolean),
+  }
+}
+
+/** `/blog` with an ItemList of published articles. */
+export function blogPageSeo(
+  siteUrl: string,
+  posts: Array<{ slug: string; title: string }>,
+): PageSeo {
+  return staticPageSeo('/blog', siteUrl, [blogListSchema(siteUrl, posts)].filter(Boolean))
+}
+
+/** `/blog/:slug` — title, description, OG image and BlogPosting schema from CMS. */
+export function blogPostSeo(siteUrl: string, post: SeoBlogPost): PageSeo {
+  const base = blogPostPageSeo(post, siteUrl)
+  const breadcrumbs = breadcrumbTrail(base.path, post.title)
+
+  return {
+    ...base,
+    jsonLd: [
+      webPageSchema(siteUrl, base, { type: 'ItemPage', breadcrumbs }),
+      breadcrumbSchema(siteUrl, breadcrumbs),
+      articleSchema(siteUrl, post, { description: base.description }),
     ].filter(Boolean),
   }
 }
